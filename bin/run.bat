@@ -2,6 +2,10 @@
 REM Membuat folder bin jika belum ada
 if not exist bin mkdir bin
 
+REM Copy resource dari src/assets ke bin/assets
+if not exist bin\assets mkdir bin\assets
+xcopy /Y /E src\assets\*.* bin\assets\
+
 echo [1] Compiling source code...
 javac -d bin -sourcepath src src\AppLauncher.java
 
