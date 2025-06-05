@@ -20,10 +20,9 @@ public class ContractView extends JPanel {
     private AddContractView addContractPanel;
 
     public ContractView() {
-        setLayout(null); // Pakai absolute untuk panel utama
-        setBackground(new Color(245, 246, 250)); // background super light
+        setLayout(null);
+        setBackground(new Color(245, 246, 250));
 
-        // Main content panel (putih, rounded, shadow)
         JPanel mainPanel = new JPanel(null) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -36,20 +35,19 @@ public class ContractView extends JPanel {
                 g2.dispose();
             }
         };
+        
         mainPanel.setOpaque(false);
-        mainPanel.setBounds(80, 40, 800, 600); // margin kiri besar, dan margin atas
+        mainPanel.setBounds(80, 40, 900, 600); // Lebar tabel diperbesar agar muat kolom baru
         mainPanel.setBorder(new CompoundBorder(
             new EmptyBorder(0, 0, 0, 0),
             new DropShadowBorder()
         ));
 
-        // Title
         JLabel title = new JLabel("Kontrak Pembiayaan");
         title.setFont(new Font("Montserrat", Font.BOLD, 40));
         title.setForeground(new Color(39, 49, 157));
         title.setBounds(42, 32, 600, 48);
 
-        // Search
         searchField = new JTextField();
         searchField.setFont(new Font("Montserrat", Font.PLAIN, 17));
         searchField.setBounds(42, 100, 210, 38);
@@ -58,9 +56,8 @@ public class ContractView extends JPanel {
             new EmptyBorder(0, 10, 0, 0)
         ));
         searchField.setToolTipText("Cari Kontrak");
-        searchField.putClientProperty("JTextField.placeholderText", "Cari Kontrak"); // FlatLaf support
+        searchField.putClientProperty("JTextField.placeholderText", "Cari Kontrak");
 
-        // Add button
         addButton = new JButton("+ Tambah Kontrak");
         addButton.setFont(new Font("Montserrat", Font.BOLD, 16));
         addButton.setBackground(new Color(39, 49, 157));
@@ -69,10 +66,11 @@ public class ContractView extends JPanel {
         addButton.setBorder(new RoundBorder(12));
         addButton.setBounds(270, 100, 180, 38);
         addButton.addActionListener(e -> showAddContractPanel());
-        // Table area
-        String[] columns = {"ID Kontrak", "Username", "Status", ""};
+
+        // Tabel: Tambah kolom Branch & Total Cicilan
+        String[] columns = {"ID Kontrak", "Username", "Status", "Branch", "Total Cicilan", ""};
         tableModel = new DefaultTableModel(columns, 0) {
-            @Override public boolean isCellEditable(int row, int col) { return col == 3; }
+            @Override public boolean isCellEditable(int row, int col) { return col == 5; }
         };
 
         contractTable = new JTable(tableModel);
@@ -82,7 +80,6 @@ public class ContractView extends JPanel {
         contractTable.setIntercellSpacing(new Dimension(0, 0));
         contractTable.setFillsViewportHeight(true);
 
-        // Header style
         JTableHeader header = contractTable.getTableHeader();
         header.setFont(new Font("Montserrat", Font.BOLD, 16));
         header.setOpaque(false);
@@ -109,7 +106,7 @@ public class ContractView extends JPanel {
         });
 
         // Action (3 dots) button
-        contractTable.getColumnModel().getColumn(3).setCellRenderer((table, value, isSelected, hasFocus, row, col) -> {
+        contractTable.getColumnModel().getColumn(5).setCellRenderer((table, value, isSelected, hasFocus, row, col) -> {
             JButton btn = new JButton("\u22EE");
             btn.setFont(new Font("Arial", Font.BOLD, 22));
             btn.setBackground(Color.WHITE);
@@ -121,21 +118,17 @@ public class ContractView extends JPanel {
 
         // Table scroll
         JScrollPane scrollPane = new JScrollPane(contractTable);
-        scrollPane.setBounds(32, 170, 730, 380);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setBounds(32, 170, 820, 380); // lebar diperbesar agar muat kolom
 
-        // Add components
         mainPanel.add(title);
         mainPanel.add(searchField);
         mainPanel.add(addButton);
         mainPanel.add(scrollPane);
         add(mainPanel);
 
-        // Method to load data
         loadTableData();
     }
 
-    // Optional: Rounded border for button
     class RoundBorder extends LineBorder {
         public RoundBorder(int radius) { super(new Color(39,49,157), 0, true); this.arc = radius; }
         private int arc;
@@ -145,7 +138,6 @@ public class ContractView extends JPanel {
             g.drawRoundRect(x, y, width-1, height-1, arc, arc);
         }
     }
-    // Optional: Shadow border for main panel (simple)
     class DropShadowBorder extends AbstractBorder {
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
@@ -169,7 +161,7 @@ public class ContractView extends JPanel {
         menu.show(invoker, 0, invoker.getHeight());
     }
 
-    // Load only id, username, status from kontrak table
+    // Load id, username, status, branch, total_payment dari kontrak table
     private void loadTableData() {
         List<Object[]> rows = new ArrayList<>();
         try (
@@ -177,19 +169,24 @@ public class ContractView extends JPanel {
                 config.DatabaseConfig.getInstance().getDbUrl(),
                 config.DatabaseConfig.getInstance().getDbUsername(),
                 config.DatabaseConfig.getInstance().getDbPassword()
-            );// ganti sesuai db kamu
+            );
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(
-                "SELECT k.contract_id, u.username, k.status FROM kontrak k JOIN users u ON k.staff_id = u.user_id")
+                "SELECT k.contract_id, u.username, k.status, k.branch, k.total_payment " +
+                "FROM kontrak k JOIN users u ON k.staff_id = u.user_id")
         ) {
             while (rs.next()) {
                 int id = rs.getInt("contract_id");
                 String username = rs.getString("username");
                 int status = rs.getInt("status");
+                String branch = rs.getString("branch");
+                int totalPayment = rs.getInt("total_payment");
                 rows.add(new Object[]{
                     id,
                     username,
                     status == 1 ? "Active" : "Inactive",
+                    branch,
+                    totalPayment,
                     ""
                 });
             }
@@ -207,10 +204,11 @@ public class ContractView extends JPanel {
             overlayPanel.setLayout(null);
             overlayPanel.setBounds(0, 0, getWidth(), getHeight());
             overlayPanel.setBackground(new Color(0,0,0,80));
-            // Panel form di kanan
             addContractPanel = new AddContractView(
-                () -> hideAddContractPanel(), 
-                () -> {                         
+                () -> { // onClose
+                    hideAddContractPanel();
+                }, 
+                () -> { // onSuccess (reload + close)
                     hideAddContractPanel();
                     loadTableData();
                 }
@@ -218,7 +216,8 @@ public class ContractView extends JPanel {
             addContractPanel.setBounds(getWidth()/2, 0, getWidth()/2, getHeight());
             overlayPanel.add(addContractPanel);
         }
-        add(overlayPanel, 0); // Tambah di paling depan
+        addButton.setEnabled(false); // disable button saat AddContractView tampil
+        add(overlayPanel, 0);
         overlayPanel.setVisible(true);
         revalidate();
         repaint();
@@ -228,6 +227,7 @@ public class ContractView extends JPanel {
         if (overlayPanel != null) {
             overlayPanel.setVisible(false);
             remove(overlayPanel);
+            addButton.setEnabled(true); // enable lagi
             revalidate();
             repaint();
         }

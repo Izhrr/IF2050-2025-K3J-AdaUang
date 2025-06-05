@@ -10,6 +10,8 @@ public class MainView extends JFrame {
         setSize(1200, 800);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        ImageIcon icon = new ImageIcon("src/assets/icon.png");
+        setIconImage(icon.getImage());
 
         add(new SidebarView(), BorderLayout.WEST);
         add(new ContractView(), BorderLayout.CENTER);

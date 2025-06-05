@@ -7,7 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 public class AddContractView extends JPanel {
-    private JTextField inputIDKontrak, inputTenor, inputStatus, inputTotalBayar, inputJumlahPinjaman, inputSisaCicilan, inputBranch, inputNamaCustomer;
+    private JTextField inputLoanTerm, inputTotalPayment, inputLoanPayment, inputBranch, inputCustomerName;
     private JButton buttonTambahkan;
     private Runnable onSuccess;
     private Runnable onClose;
@@ -36,14 +36,11 @@ public class AddContractView extends JPanel {
         add(title);
 
         int y = 110, h = 48, gap = 32, width = 440;
-        inputIDKontrak = addInput("ID Kontrak", "inputIDKontrak", y, h, width);
-        inputTenor = addInput("Tenor", "inputTenor", y += h+gap, h, width);
-        inputStatus = addInput("Status", "inputStatus", y += h+gap, h, width);
-        inputTotalBayar = addInput("Total Bayar", "inputTotalBayar", y += h+gap, h, width);
-        inputJumlahPinjaman = addInput("Jumlah Pinjaman", "inputJumlahPinjaman", y += h+gap, h, width);
-        inputSisaCicilan = addInput("Sisa Cicilan", "inputSisaCicilan", y += h+gap, h, width);
-        inputBranch = addInput("Branch", "inputBranch", y += h+gap, h, width); // Tambah field branch di sini
-        inputNamaCustomer = addInput("Nama Customer", "inputNamaCustomer", y += h+gap, h, width);
+        inputLoanTerm = addInput("Loan Term", "inputLoanTerm", y, h, width);
+        inputTotalPayment = addInput("Total Payment", "inputTotalPayment", y += h + gap, h, width);
+        inputLoanPayment = addInput("Loan Payment", "inputLoanPayment", y += h + gap, h, width);
+        inputBranch = addInput("Branch", "inputBranch", y += h + gap, h, width);
+        inputCustomerName = addInput("Customer Name", "inputCustomerName", y += h + gap, h, width);
 
         buttonTambahkan = new JButton("Tambahkan");
         buttonTambahkan.setName("buttonTambahkan");
@@ -69,46 +66,41 @@ public class AddContractView extends JPanel {
         JTextField field = new JTextField();
         field.setName(id);
         field.setFont(new Font("Montserrat", Font.PLAIN, 17));
-        field.setBounds(56, y+24, width, height-20);
+        field.setBounds(56, y + 24, width, height - 20);
         field.setBorder(BorderFactory.createLineBorder(new Color(185,185,185), 1, true));
         add(field);
         return field;
     }
 
     private void handleSubmit() {
-        String idKontrak = inputIDKontrak.getText().trim();
-        String tenor = inputTenor.getText().trim();
-        String status = inputStatus.getText().trim();
-        String totalBayar = inputTotalBayar.getText().trim();
-        String jumlahPinjaman = inputJumlahPinjaman.getText().trim();
-        String sisaCicilan = inputSisaCicilan.getText().trim();
+        String loanTerm = inputLoanTerm.getText().trim();
+        String totalPayment = inputTotalPayment.getText().trim();
+        String loanPayment = inputLoanPayment.getText().trim();
         String branch = inputBranch.getText().trim();
-        String customerName = inputNamaCustomer.getText().trim();
+        String customerName = inputCustomerName.getText().trim();
 
-        if (idKontrak.isEmpty() || tenor.isEmpty() || status.isEmpty() ||
-            totalBayar.isEmpty() || jumlahPinjaman.isEmpty() ||
-            sisaCicilan.isEmpty() || branch.isEmpty() || customerName.isEmpty()) {
+        if (loanTerm.isEmpty() || totalPayment.isEmpty() || loanPayment.isEmpty() || branch.isEmpty() || customerName.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Semua field wajib diisi!", "Input Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
-            int staffId = Integer.parseInt(idKontrak);
-            int loanTerm = Integer.parseInt(tenor);
-            boolean statusVal = status.equalsIgnoreCase("active") || status.equalsIgnoreCase("1") || status.equalsIgnoreCase("true");
-            int totalPayment = Integer.parseInt(totalBayar);
-            int loanPayment = Integer.parseInt(jumlahPinjaman);
-            int remainingInstallment = Integer.parseInt(sisaCicilan);
+            int staffId = 1; // default staff_id, bisa diganti sesuai kebutuhan user login
+            int loanTermVal = Integer.parseInt(loanTerm);
+            int totalPaymentVal = Integer.parseInt(totalPayment);
+            int loanPaymentVal = Integer.parseInt(loanPayment);
+            int statusVal = 1; // status selalu 1 (active)
+            int remainingInstallmentVal = totalPaymentVal;
 
             Connection conn = DatabaseConnection.getInstance().getConnection();
             String sql = "INSERT INTO kontrak (staff_id, loan_term, status, total_payment, loan_payment, remaining_installment, branch, customer_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, staffId);
-                stmt.setInt(2, loanTerm);
-                stmt.setBoolean(3, statusVal);
-                stmt.setInt(4, totalPayment);
-                stmt.setInt(5, loanPayment);
-                stmt.setInt(6, remainingInstallment);
+                stmt.setInt(2, loanTermVal);
+                stmt.setInt(3, statusVal);
+                stmt.setInt(4, totalPaymentVal);
+                stmt.setInt(5, loanPaymentVal);
+                stmt.setInt(6, remainingInstallmentVal);
                 stmt.setString(7, branch);
                 stmt.setString(8, customerName);
 
