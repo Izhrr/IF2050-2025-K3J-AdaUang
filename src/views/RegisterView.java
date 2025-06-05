@@ -9,6 +9,7 @@ import java.awt.*;
 public class RegisterView extends BaseView {
     private final JTextField fullNameField;
     private final JTextField usernameField;
+    private final JTextField branchField;
     private final JPasswordField passwordField;
     private final JPasswordField confirmPasswordField;
     private final JButton registerButton;
@@ -63,25 +64,25 @@ public class RegisterView extends BaseView {
         JLabel titleLabel = new JLabel("Buat Akun Baru");
         titleLabel.setFont(AppConstants.getMontserrat(36f, Font.BOLD));
         titleLabel.setForeground(new Color(43, 70, 191));
-        titleLabel.setBounds(40, 100, rightPanelWidth - 80, 48);
+        titleLabel.setBounds(40, 80, rightPanelWidth - 80, 48);
         rightPanel.add(titleLabel);
 
         // Subjudul
         JLabel subtitleLabel = new JLabel("Silahkan isi detail akun anda");
         subtitleLabel.setFont(AppConstants.getMontserrat(16f, Font.PLAIN));
         subtitleLabel.setForeground(new Color(44, 62, 80));
-        subtitleLabel.setBounds(40, 150, rightPanelWidth - 80, 24);
+        subtitleLabel.setBounds(40, 130, rightPanelWidth - 80, 24);
         rightPanel.add(subtitleLabel);
 
         // Nama
         JLabel fullNameLabel = new JLabel("Nama");
         fullNameLabel.setFont(AppConstants.getMontserrat(14f, Font.PLAIN));
         fullNameLabel.setForeground(new Color(180, 180, 180));
-        fullNameLabel.setBounds(40, 200, rightPanelWidth - 80, 18);
+        fullNameLabel.setBounds(40, 180, rightPanelWidth - 80, 18);
         rightPanel.add(fullNameLabel);
 
         fullNameField = new JTextField();
-        fullNameField.setBounds(40, 222, rightPanelWidth - 80, 38);
+        fullNameField.setBounds(40, 202, rightPanelWidth - 80, 38);
         fullNameField.setFont(AppConstants.getMontserrat(16f, Font.PLAIN));
         fullNameField.setBackground(new Color(250, 250, 250));
         fullNameField.setBorder(BorderFactory.createLineBorder(new Color(210, 210, 210), 2));
@@ -91,25 +92,39 @@ public class RegisterView extends BaseView {
         JLabel usernameLabel = new JLabel("Username");
         usernameLabel.setFont(AppConstants.getMontserrat(14f, Font.PLAIN));
         usernameLabel.setForeground(new Color(180, 180, 180));
-        usernameLabel.setBounds(40, 272, rightPanelWidth - 80, 18);
+        usernameLabel.setBounds(40, 252, rightPanelWidth - 80, 18);
         rightPanel.add(usernameLabel);
 
         usernameField = new JTextField();
-        usernameField.setBounds(40, 294, rightPanelWidth - 80, 38);
+        usernameField.setBounds(40, 274, rightPanelWidth - 80, 38);
         usernameField.setFont(AppConstants.getMontserrat(16f, Font.PLAIN));
         usernameField.setBackground(new Color(250, 250, 250));
         usernameField.setBorder(BorderFactory.createLineBorder(new Color(210, 210, 210), 2));
         rightPanel.add(usernameField);
 
+        // Branch
+        JLabel branchLabel = new JLabel("Cabang");
+        branchLabel.setFont(AppConstants.getMontserrat(14f, Font.PLAIN));
+        branchLabel.setForeground(new Color(180, 180, 180));
+        branchLabel.setBounds(40, 324, rightPanelWidth - 80, 18);
+        rightPanel.add(branchLabel);
+
+        branchField = new JTextField();
+        branchField.setBounds(40, 346, rightPanelWidth - 80, 38);
+        branchField.setFont(AppConstants.getMontserrat(16f, Font.PLAIN));
+        branchField.setBackground(new Color(250, 250, 250));
+        branchField.setBorder(BorderFactory.createLineBorder(new Color(210, 210, 210), 2));
+        rightPanel.add(branchField);
+
         // Password
         JLabel passwordLabel = new JLabel("Password");
         passwordLabel.setFont(AppConstants.getMontserrat(14f, Font.PLAIN));
         passwordLabel.setForeground(new Color(180, 180, 180));
-        passwordLabel.setBounds(40, 344, rightPanelWidth - 80, 18);
+        passwordLabel.setBounds(40, 396, rightPanelWidth - 80, 18);
         rightPanel.add(passwordLabel);
 
         passwordField = new JPasswordField();
-        passwordField.setBounds(40, 366, rightPanelWidth - 80, 38);
+        passwordField.setBounds(40, 418, rightPanelWidth - 80, 38);
         passwordField.setFont(AppConstants.getMontserrat(16f, Font.PLAIN));
         passwordField.setBackground(new Color(250, 250, 250));
         passwordField.setBorder(BorderFactory.createLineBorder(new Color(210, 210, 210), 2));
@@ -119,11 +134,11 @@ public class RegisterView extends BaseView {
         JLabel confirmPasswordLabel = new JLabel("Ulangi Password");
         confirmPasswordLabel.setFont(AppConstants.getMontserrat(14f, Font.PLAIN));
         confirmPasswordLabel.setForeground(new Color(180, 180, 180));
-        confirmPasswordLabel.setBounds(40, 416, rightPanelWidth - 80, 18);
+        confirmPasswordLabel.setBounds(40, 468, rightPanelWidth - 80, 18);
         rightPanel.add(confirmPasswordLabel);
 
         confirmPasswordField = new JPasswordField();
-        confirmPasswordField.setBounds(40, 438, rightPanelWidth - 80, 38);
+        confirmPasswordField.setBounds(40, 490, rightPanelWidth - 80, 38);
         confirmPasswordField.setFont(AppConstants.getMontserrat(16f, Font.PLAIN));
         confirmPasswordField.setBackground(new Color(250, 250, 250));
         confirmPasswordField.setBorder(BorderFactory.createLineBorder(new Color(210, 210, 210), 2));
@@ -131,7 +146,7 @@ public class RegisterView extends BaseView {
 
         // Tombol Register
         registerButton = new JButton("Register");
-        registerButton.setBounds(40, 498, rightPanelWidth - 80, 42);
+        registerButton.setBounds(40, 550, rightPanelWidth - 80, 42);
         registerButton.setBackground(new Color(43, 70, 191));
         registerButton.setForeground(Color.WHITE);
         registerButton.setFont(AppConstants.getMontserrat(18f, Font.BOLD));
@@ -147,16 +162,17 @@ public class RegisterView extends BaseView {
     private void onRegister() {
         String fullName = fullNameField.getText().trim();
         String username = usernameField.getText().trim();
+        String branch = branchField.getText().trim();
         String password = new String(passwordField.getPassword());
         String confirmPassword = new String(confirmPasswordField.getPassword());
 
-        if (fullName.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+        if (fullName.isEmpty() || username.isEmpty() || branch.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             showMessage("Silakan isi semua field!");
             return;
         }
-        boolean success = authController.register(username, fullName, password, confirmPassword, "user");
+        boolean success = authController.register(username, fullName, password, confirmPassword, "user", branch);
         if (success) {
-            showMessage("Registrasi berhasil! Selamat datang " + authController.getCurrentUser().getDisplayName());
+            showMessage("Registrasi berhasil! Selamat datang " + authController.getCurrentUser().getFullname());
             // TODO: lanjut ke dashboard/main menu
             dispose();
         } else {

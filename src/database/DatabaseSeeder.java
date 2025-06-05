@@ -4,6 +4,8 @@ import config.DatabaseConfig;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Date;
+import java.time.LocalDate;
 
 public class DatabaseSeeder {
     private DatabaseConfig config;
@@ -71,22 +73,23 @@ public class DatabaseSeeder {
         Connection conn = dbConnection.getConnection();
         
         String sql = "INSERT INTO " + config.getUsersTableName() + 
-                    " (username, full_name, role, password) VALUES (?, ?, ?, ?)";
+                    " (username, fullname, password, branch, role) VALUES (?, ?, ?, ?, ?)";
         
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             // Test accounts for development
-            String[][] testUsers = {
-                {"admin", "Administrator", "admin", "admin123"},
-                {"izhrr", "Izhrr - Project Lead", "admin", "izhrr123"},
-                {"testuser", "Test User", "user", "password123"}, 
-                {"demo", "Demo Account", "user", "demo123"}
+            Object[][] testUsers = {
+                {"admin", "Administrator", "admin123", "Jakarta", "admin"},
+                {"izhrr", "Izhrr - Project Lead", "izhrr123", "Bandung", "admin"},
+                {"testuser", "Test User", "password123", "Surabaya", "user"}, 
+                {"demo", "Demo Account", "demo123", "Jakarta", "user"}
             };
             
-            for (String[] user : testUsers) {
-                stmt.setString(1, user[0]); // username
-                stmt.setString(2, user[1]); // full_name
-                stmt.setString(3, user[2]); // role
-                stmt.setString(4, user[3]); // password
+            for (Object[] user : testUsers) {
+                stmt.setString(1, (String) user[0]); // username
+                stmt.setString(2, (String) user[1]); // fullname
+                stmt.setString(3, (String) user[2]); // password
+                stmt.setString(4, (String) user[3]); // branch
+                stmt.setString(5, (String) user[4]); // role
                 stmt.addBatch();
             }
             
@@ -101,24 +104,23 @@ public class DatabaseSeeder {
     private void insertTestContracts() throws SQLException {
         Connection conn = dbConnection.getConnection();
 
-        // Asumsi staff_id 1, 2, 3 sudah ada dari insertTestUsers
-        String sql = "INSERT INTO kontrak (staff_id, loan_term, status, total_payment, loan_payment, remaining_installment, branch, customer_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        // Asumsi id_user 1, 2, 3, 4 sudah ada dari insertTestUsers
+        String sql = "INSERT INTO kontrak (nama_user, total, tenor, jumlah_bayar, status, tanggal_pinjam, id_user) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             Object[][] testContracts = {
-                {1, 12, true, 12000000, 1000000, 12, "Jakarta", "Budi Santoso"},
-                {2, 24, false, 48000000, 2000000, 0, "Bandung", "Siti Aminah"},
-                {3, 6, true, 6000000, 1000000, 6, "Surabaya", "Agus Wijaya"}
+                {"Budi Santoso", 12000000, 12, 1000000, true, LocalDate.of(2024, 12, 1), 1},
+                {"Siti Aminah", 48000000, 24, 2000000, false, LocalDate.of(2024, 11, 15), 2},
+                {"Agus Wijaya", 6000000, 6, 1000000, true, LocalDate.of(2025, 1, 10), 3}
             };
 
             for (Object[] kontrak : testContracts) {
-                stmt.setInt(1, (Integer) kontrak[0]);
-                stmt.setInt(2, (Integer) kontrak[1]);
-                stmt.setBoolean(3, (Boolean) kontrak[2]);
-                stmt.setInt(4, (Integer) kontrak[3]);
-                stmt.setInt(5, (Integer) kontrak[4]);
-                stmt.setInt(6, (Integer) kontrak[5]);
-                stmt.setString(7, (String) kontrak[6]);
-                stmt.setString(8, (String) kontrak[7]);
+                stmt.setString(1, (String) kontrak[0]); // nama_user
+                stmt.setInt(2, (Integer) kontrak[1]); // total
+                stmt.setInt(3, (Integer) kontrak[2]); // tenor
+                stmt.setInt(4, (Integer) kontrak[3]); // jumlah_bayar
+                stmt.setBoolean(5, (Boolean) kontrak[4]); // status
+                stmt.setDate(6, Date.valueOf((LocalDate) kontrak[5])); // tgl_pinjem
+                stmt.setInt(7, (Integer) kontrak[6]); // id_user
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -128,21 +130,22 @@ public class DatabaseSeeder {
     private void printSeededData() throws SQLException {
         Connection conn = dbConnection.getConnection();
         
-        String sql = "SELECT user_id, username, full_name, role, created_at FROM " + 
-                    config.getUsersTableName() + " ORDER BY created_at DESC LIMIT 10";
+        String sql = "SELECT id_user, username, fullname, branch, role FROM " + 
+                    config.getUsersTableName() + " ORDER BY id_user ASC LIMIT 10";
         
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              var rs = stmt.executeQuery()) {
             
             System.out.println("\n SEEDED TEST ACCOUNTS:");
-            System.out.println("ID | Username\t| Full Name\t\t| Role\t| Login Info");
-            System.out.println("----------------------------------------------------------------");
+            System.out.println("ID | Username\t| Full Name\t\t| Branch\t| Role\t| Login Info");
+            System.out.println("-------------------------------------------------------------------------------");
             
             while (rs.next()) {
-                System.out.printf("%-2d | %-12s| %-20s| %-6s| %s/%s%n",
-                    rs.getInt("user_id"),
+                System.out.printf("%-2d | %-12s| %-20s| %-10s| %-6s| %s/%s%n",
+                    rs.getInt("id_user"),
                     rs.getString("username"),
-                    rs.getString("full_name"), 
+                    rs.getString("fullname"), 
+                    rs.getString("branch"),
                     rs.getString("role"),
                     rs.getString("username"),
                     getPasswordHint(rs.getString("username")));

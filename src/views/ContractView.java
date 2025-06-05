@@ -172,21 +172,21 @@ public class ContractView extends JPanel {
             );
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(
-                "SELECT k.contract_id, u.username, k.status, k.branch, k.total_payment " +
-                "FROM kontrak k JOIN users u ON k.staff_id = u.user_id")
+                "SELECT k.id_kontrak, u.username, k.status, u.branch, k.jumlah_bayar " +
+                "FROM kontrak k JOIN users u ON k.id_user = u.id_user")
         ) {
             while (rs.next()) {
-                int id = rs.getInt("contract_id");
+                int id = rs.getInt("id_kontrak");
                 String username = rs.getString("username");
-                int status = rs.getInt("status");
+                boolean status = rs.getBoolean("status");
                 String branch = rs.getString("branch");
-                int totalPayment = rs.getInt("total_payment");
+                int jumlahBayar = rs.getInt("jumlah_bayar");
                 rows.add(new Object[]{
                     id,
                     username,
-                    status == 1 ? "Active" : "Inactive",
+                    status ? "Active" : "Inactive",
                     branch,
-                    totalPayment,
+                    jumlahBayar,
                     ""
                 });
             }

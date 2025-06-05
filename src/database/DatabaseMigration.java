@@ -66,13 +66,12 @@ public class DatabaseMigration {
         try (Statement stmt = conn.createStatement()) {
             String sql = """
                 CREATE TABLE IF NOT EXISTS %s (
-                    user_id INT PRIMARY KEY AUTO_INCREMENT,
+                    id_user INT PRIMARY KEY AUTO_INCREMENT,
                     username VARCHAR(50) UNIQUE NOT NULL,
-                    full_name VARCHAR(100) NOT NULL,
-                    role VARCHAR(20) DEFAULT 'user',
+                    fullname VARCHAR(100) NOT NULL,
                     password VARCHAR(255) NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                    branch VARCHAR(50) NOT NULL,
+                    role VARCHAR(20) DEFAULT 'user'
                 )
                 """.formatted(config.getUsersTableName());
             
@@ -80,11 +79,12 @@ public class DatabaseMigration {
             
             if (config.isDebugMode()) {
                 System.out.println(" Users table ready");
-                System.out.println("   - user_id (Primary Key)");
+                System.out.println("   - id_user (Primary Key)");
                 System.out.println("   - username (Login)");
-                System.out.println("   - full_name (Display Name)");
-                System.out.println("   - role (user/admin)");
+                System.out.println("   - fullname (Nama Lengkap)");
                 System.out.println("   - password (Authentication)");
+                System.out.println("   - branch (Cabang)");
+                System.out.println("   - role (user/admin)");
             }
         }
     }
@@ -94,16 +94,15 @@ public class DatabaseMigration {
         try (Statement stmt = conn.createStatement()) {
             String sql = """
                 CREATE TABLE IF NOT EXISTS kontrak (
-                    contract_id INT PRIMARY KEY AUTO_INCREMENT,
-                    staff_id INT NOT NULL,
-                    loan_term INT NOT NULL,
+                    id_kontrak INT PRIMARY KEY AUTO_INCREMENT,
+                    nama_user VARCHAR(100) NOT NULL,
+                    total INT NOT NULL,
+                    tenor INT NOT NULL,
+                    jumlah_bayar INT NOT NULL,
                     status BOOLEAN NOT NULL,
-                    total_payment INT NOT NULL,
-                    loan_payment INT NOT NULL,
-                    remaining_installment INT NOT NULL,
-                    branch VARCHAR(50) NOT NULL,
-                    customer_name VARCHAR(50) NOT NULL,
-                    FOREIGN KEY (staff_id) REFERENCES %s(user_id)
+                    tanggal_pinjam DATE NOT NULL,
+                    id_user INT NOT NULL,
+                    FOREIGN KEY (id_user) REFERENCES %s(id_user)
                 )
                 """.formatted(config.getUsersTableName());
 
@@ -111,9 +110,14 @@ public class DatabaseMigration {
 
             if (config.isDebugMode()) {
                 System.out.println(" Kontrak table ready");
-                System.out.println("   - contract_id (Primary Key)");
-                System.out.println("   - staff_id (Foreign Key ke users)");
-                System.out.println("   - loan_term, status, total_payment, loan_payment, remaining_installment, branch, customer_name");
+                System.out.println("   - id_kontrak (Primary Key)");
+                System.out.println("   - nama_user");
+                System.out.println("   - total");
+                System.out.println("   - tenor");
+                System.out.println("   - jumlah_bayar");
+                System.out.println("   - status");
+                System.out.println("   - tanggal_pinjam");
+                System.out.println("   - id_user (Foreign Key ke users)");
             }
         }
     }

@@ -137,7 +137,7 @@ public class LoginView extends BaseView {
         }
         boolean success = authController.login(username, password);
         if (success) {
-            showMessage("Login berhasil! Selamat datang, " + authController.getCurrentUser().getDisplayName());
+            showMessage("Login berhasil! Selamat datang, " + authController.getCurrentUser().getFullname());
             // TODO: lanjut ke dashboard/main menu
             new MainView().setVisible(true);
             dispose();
