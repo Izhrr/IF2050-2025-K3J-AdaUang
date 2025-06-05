@@ -11,6 +11,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+// Tambahan: pastikan AuthController di-import dan tersedia di class ini
+import controllers.AuthController;
+
 public class ContractView extends JPanel {
     private JTable contractTable;
     private DefaultTableModel tableModel;
@@ -18,8 +21,11 @@ public class ContractView extends JPanel {
     private JButton addButton;
     private JPanel overlayPanel;
     private AddContractView addContractPanel;
+    private AuthController authController;
 
-    public ContractView() {
+    // Tambahkan AuthController pada konstruktor agar id user login bisa didapat
+    public ContractView(AuthController authController) {
+        this.authController = authController;
         setLayout(null);
         setBackground(new Color(245, 246, 250));
 
@@ -35,9 +41,9 @@ public class ContractView extends JPanel {
                 g2.dispose();
             }
         };
-        
+
         mainPanel.setOpaque(false);
-        mainPanel.setBounds(80, 40, 900, 600); // Lebar tabel diperbesar agar muat kolom baru
+        mainPanel.setBounds(80, 40, 800, 600); // Lebar tabel diperbesar agar muat kolom baru
         mainPanel.setBorder(new CompoundBorder(
             new EmptyBorder(0, 0, 0, 0),
             new DropShadowBorder()
@@ -204,6 +210,10 @@ public class ContractView extends JPanel {
             overlayPanel.setLayout(null);
             overlayPanel.setBounds(0, 0, getWidth(), getHeight());
             overlayPanel.setBackground(new Color(0,0,0,80));
+            int idUser = 0;
+            if (authController != null && authController.getCurrentUser() != null) {
+                idUser = authController.getCurrentUser().getId_user();
+            }
             addContractPanel = new AddContractView(
                 () -> { // onClose
                     hideAddContractPanel();
@@ -211,7 +221,8 @@ public class ContractView extends JPanel {
                 () -> { // onSuccess (reload + close)
                     hideAddContractPanel();
                     loadTableData();
-                }
+                },
+                idUser // <-- Pastikan id user login dilempar ke AddContractView
             );
             addContractPanel.setBounds(getWidth()/2, 0, getWidth()/2, getHeight());
             overlayPanel.add(addContractPanel);

@@ -1,10 +1,11 @@
 package views;
 
+import controllers.AuthController;
 import javax.swing.*;
 import java.awt.*;
 
 public class MainView extends JFrame {
-    public MainView() {
+    public MainView(AuthController authController) {
         setTitle("AdaUang - Kontrak Pembiayaan");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 800);
@@ -14,6 +15,6 @@ public class MainView extends JFrame {
         setIconImage(icon.getImage());
 
         add(new SidebarView(), BorderLayout.WEST);
-        add(new ContractView(), BorderLayout.CENTER);
+        add(new ContractView(authController), BorderLayout.CENTER);
     }
 }

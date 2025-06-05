@@ -3,20 +3,31 @@ package views;
 import database.DatabaseConnection;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
+import java.sql.Date;
 
 public class AddContractView extends JPanel {
-    private JTextField inputLoanTerm, inputTotalPayment, inputLoanPayment, inputBranch, inputCustomerName;
+    private JTextField inputTenor, inputTotal, inputNamaUser, inputTanggal, inputIdUser;
     private JButton buttonTambahkan;
     private Runnable onSuccess;
     private Runnable onClose;
+    private int idUser; // id_user dari user login
+    private LocalDate today;
 
-    public AddContractView(Runnable onClose, Runnable onSuccess) {
+    public AddContractView(Runnable onClose, Runnable onSuccess, int idUser) {
         setLayout(null);
         setBackground(Color.WHITE);
         this.onClose = onClose;
         this.onSuccess = onSuccess;
+        this.idUser = idUser;
+        this.today = LocalDate.now();
+
+        // Panel harus "modal"
+        setFocusable(true);
+        enableEvents(AWTEvent.MOUSE_EVENT_MASK | AWTEvent.KEY_EVENT_MASK);
 
         // X button
         JButton closeBtn = new JButton("✕");
@@ -25,8 +36,8 @@ public class AddContractView extends JPanel {
         closeBtn.setFocusPainted(false);
         closeBtn.setContentAreaFilled(false);
         closeBtn.setForeground(new Color(39, 49, 157));
-        closeBtn.setBounds(620, 20, 40, 40);
-        closeBtn.addActionListener(e -> onClose.run());
+        closeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        closeBtn.setToolTipText("Tutup panel");
         add(closeBtn);
 
         JLabel title = new JLabel("Tambah Kontrak");
@@ -36,11 +47,13 @@ public class AddContractView extends JPanel {
         add(title);
 
         int y = 110, h = 48, gap = 32, width = 440;
-        inputLoanTerm = addInput("Loan Term", "inputLoanTerm", y, h, width);
-        inputTotalPayment = addInput("Total Payment", "inputTotalPayment", y += h + gap, h, width);
-        inputLoanPayment = addInput("Loan Payment", "inputLoanPayment", y += h + gap, h, width);
-        inputBranch = addInput("Branch", "inputBranch", y += h + gap, h, width);
-        inputCustomerName = addInput("Customer Name", "inputCustomerName", y += h + gap, h, width);
+        inputNamaUser    = addInput("Nama User", "inputNamaUser", y, h, width, false);
+        inputTotal       = addInput("Total Pinjaman", "inputTotal", y += h + gap, h, width, false);
+        inputTenor       = addInput("Tenor (bulan)", "inputTenor", y += h + gap, h, width, false);
+        inputTanggal     = addInput("Tanggal Pinjam", "inputTanggal", y += h + gap, h, width, true);
+        inputTanggal.setText(today.toString());
+        inputIdUser      = addInput("ID User", "inputIdUser", y += h + gap, h, width, true);
+        inputIdUser.setText(String.valueOf(idUser));
 
         buttonTambahkan = new JButton("Tambahkan");
         buttonTambahkan.setName("buttonTambahkan");
@@ -54,9 +67,10 @@ public class AddContractView extends JPanel {
 
         buttonTambahkan.addActionListener(e -> handleSubmit());
         setBorder(BorderFactory.createMatteBorder(0, 2, 0, 0, new Color(230,230,230)));
+
     }
 
-    private JTextField addInput(String label, String id, int y, int height, int width) {
+    private JTextField addInput(String label, String id, int y, int height, int width, boolean readonly) {
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("Montserrat", Font.PLAIN, 15));
         lbl.setForeground(new Color(180, 180, 180));
@@ -68,41 +82,57 @@ public class AddContractView extends JPanel {
         field.setFont(new Font("Montserrat", Font.PLAIN, 17));
         field.setBounds(56, y + 24, width, height - 20);
         field.setBorder(BorderFactory.createLineBorder(new Color(185,185,185), 1, true));
+        field.setEditable(!readonly);
+        field.setBackground(readonly ? new Color(240,240,240) : Color.WHITE);
         add(field);
         return field;
     }
 
-    private void handleSubmit() {
-        String loanTerm = inputLoanTerm.getText().trim();
-        String totalPayment = inputTotalPayment.getText().trim();
-        String loanPayment = inputLoanPayment.getText().trim();
-        String branch = inputBranch.getText().trim();
-        String customerName = inputCustomerName.getText().trim();
+    // Modal protection: blok semua event
+    @Override
+    protected void processMouseEvent(MouseEvent e) {
+        e.consume();
+        super.processMouseEvent(e);
+    }
+    @Override
+    protected void processKeyEvent(KeyEvent e) {
+        e.consume();
+        super.processKeyEvent(e);
+    }
+    @Override
+    public void setVisible(boolean aFlag) {
+        super.setVisible(aFlag);
+        if (aFlag) {
+            requestFocusInWindow();
+        }
+    }
 
-        if (loanTerm.isEmpty() || totalPayment.isEmpty() || loanPayment.isEmpty() || branch.isEmpty() || customerName.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Semua field wajib diisi!", "Input Error", JOptionPane.WARNING_MESSAGE);
+    private void handleSubmit() {
+        String namaUser = inputNamaUser.getText().trim();
+        String total = inputTotal.getText().trim();
+        String tenor = inputTenor.getText().trim();
+
+        if (namaUser.isEmpty() || total.isEmpty() || tenor.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nama, Total, dan Tenor wajib diisi!", "Input Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
-            int staffId = 1; // default staff_id, bisa diganti sesuai kebutuhan user login
-            int loanTermVal = Integer.parseInt(loanTerm);
-            int totalPaymentVal = Integer.parseInt(totalPayment);
-            int loanPaymentVal = Integer.parseInt(loanPayment);
-            int statusVal = 1; // status selalu 1 (active)
-            int remainingInstallmentVal = totalPaymentVal;
+            int tenorVal = Integer.parseInt(tenor);
+            int totalVal = Integer.parseInt(total);
+            int jumlahBayarVal = 0; // default selalu 0
+            boolean statusVal = true; // status default 1/true (aktif)
 
             Connection conn = DatabaseConnection.getInstance().getConnection();
-            String sql = "INSERT INTO kontrak (staff_id, loan_term, status, total_payment, loan_payment, remaining_installment, branch, customer_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO kontrak (nama_user, total, tenor, jumlah_bayar, status, tanggal_pinjam, id_user) VALUES (?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, staffId);
-                stmt.setInt(2, loanTermVal);
-                stmt.setInt(3, statusVal);
-                stmt.setInt(4, totalPaymentVal);
-                stmt.setInt(5, loanPaymentVal);
-                stmt.setInt(6, remainingInstallmentVal);
-                stmt.setString(7, branch);
-                stmt.setString(8, customerName);
+                stmt.setString(1, namaUser);
+                stmt.setInt(2, totalVal);
+                stmt.setInt(3, tenorVal);
+                stmt.setInt(4, jumlahBayarVal); // Always 0
+                stmt.setBoolean(5, statusVal);
+                stmt.setDate(6, Date.valueOf(today));
+                stmt.setInt(7, idUser);
 
                 int result = stmt.executeUpdate();
                 if (result > 0) {
@@ -114,7 +144,7 @@ public class AddContractView extends JPanel {
                 }
             }
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Pastikan semua field numerik diisi dengan benar!", "Format Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Pastikan field numerik diisi dengan benar!", "Format Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Terjadi kesalahan: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }

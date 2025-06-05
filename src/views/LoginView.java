@@ -139,7 +139,7 @@ public class LoginView extends BaseView {
         if (success) {
             showMessage("Login berhasil! Selamat datang, " + authController.getCurrentUser().getFullname());
             // TODO: lanjut ke dashboard/main menu
-            new MainView().setVisible(true);
+            new MainView(authController).setVisible(true);
             dispose();
         } else {
             showMessage("Login gagal! Username atau password salah.");
