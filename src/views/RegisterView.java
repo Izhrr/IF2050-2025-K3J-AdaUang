@@ -174,6 +174,7 @@ public class RegisterView extends BaseView {
         if (success) {
             showMessage("Registrasi berhasil! Selamat datang " + authController.getCurrentUser().getFullname());
             // TODO: lanjut ke dashboard/main menu
+            new LoginView(authController).setVisible(true);
             dispose();
         } else {
             showMessage("Registrasi gagal! Username mungkin sudah dipakai atau data tidak valid.");
