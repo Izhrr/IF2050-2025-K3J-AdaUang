@@ -25,6 +25,7 @@ public class DatabaseSeeder {
             
             // Insert test users
             insertTestUsers();
+            insertTestContracts();
             
             if (config.isDebugMode()) {
                 System.out.println(" Database seeding completed successfully!");
@@ -43,19 +44,29 @@ public class DatabaseSeeder {
     private void clearTestData() throws SQLException {
         Connection conn = dbConnection.getConnection();
 
-        // Hapus SEMUA data dari tabel users
+        // Hapus SEMUA data dari tabel kontrak (child) terlebih dahulu!
+        String sqlDeleteKontrak = "DELETE FROM kontrak";
+        try (PreparedStatement stmt = conn.prepareStatement(sqlDeleteKontrak)) {
+            stmt.executeUpdate();
+        }
+        // Reset AUTO_INCREMENT ke 1 untuk kontrak
+        String sqlResetKontrak = "ALTER TABLE kontrak AUTO_INCREMENT = 1";
+        try (PreparedStatement stmt = conn.prepareStatement(sqlResetKontrak)) {
+            stmt.executeUpdate();
+        }
+
+        // Baru kemudian hapus users (parent)
         String sqlDelete = "DELETE FROM " + config.getUsersTableName();
         try (PreparedStatement stmt = conn.prepareStatement(sqlDelete)) {
             stmt.executeUpdate();
         }
 
-        // Reset AUTO_INCREMENT ke 1
         String sqlReset = "ALTER TABLE " + config.getUsersTableName() + " AUTO_INCREMENT = 1";
         try (PreparedStatement stmt = conn.prepareStatement(sqlReset)) {
             stmt.executeUpdate();
         }
     }
-    
+        
     private void insertTestUsers() throws SQLException {
         Connection conn = dbConnection.getConnection();
         
@@ -84,6 +95,33 @@ public class DatabaseSeeder {
             if (config.isDebugMode()) {
                 System.out.println(" Inserted " + results.length + " test users");
             }
+        }
+    }
+
+    private void insertTestContracts() throws SQLException {
+        Connection conn = dbConnection.getConnection();
+
+        // Asumsi staff_id 1, 2, 3 sudah ada dari insertTestUsers
+        String sql = "INSERT INTO kontrak (staff_id, loan_term, status, total_payment, loan_payment, remaining_installment, branch, customer_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Object[][] testContracts = {
+                {1, 12, true, 12000000, 1000000, 12, "Jakarta", "Budi Santoso"},
+                {2, 24, false, 48000000, 2000000, 0, "Bandung", "Siti Aminah"},
+                {3, 6, true, 6000000, 1000000, 6, "Surabaya", "Agus Wijaya"}
+            };
+
+            for (Object[] kontrak : testContracts) {
+                stmt.setInt(1, (Integer) kontrak[0]);
+                stmt.setInt(2, (Integer) kontrak[1]);
+                stmt.setBoolean(3, (Boolean) kontrak[2]);
+                stmt.setInt(4, (Integer) kontrak[3]);
+                stmt.setInt(5, (Integer) kontrak[4]);
+                stmt.setInt(6, (Integer) kontrak[5]);
+                stmt.setString(7, (String) kontrak[6]);
+                stmt.setString(8, (String) kontrak[7]);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
         }
     }
     

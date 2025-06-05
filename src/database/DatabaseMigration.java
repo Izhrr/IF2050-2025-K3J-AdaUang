@@ -25,6 +25,7 @@ public class DatabaseMigration {
             
             // Create tables
             createUsersTable();
+            createContractsTable();
             
             // // Create indexes
             // createIndexes();
@@ -88,20 +89,32 @@ public class DatabaseMigration {
         }
     }
     
-    // private void createIndexes() throws SQLException {
-    //     Connection conn = dbConnection.getConnection();
-    //     try (Statement stmt = conn.createStatement()) {
-    //         // Index for username lookup (login)
-    //         stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_username ON " + 
-    //             config.getUsersTableName() + "(username)");
-            
-    //         // Index for role lookup
-    //         stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_role ON " + 
-    //             config.getUsersTableName() + "(role)");
-            
-    //         if (config.isDebugMode()) {
-    //             System.out.println(" Database indexes ready");
-    //         }
-    //     }
-    // }
+    private void createContractsTable() throws SQLException {
+        Connection conn = dbConnection.getConnection();
+        try (Statement stmt = conn.createStatement()) {
+            String sql = """
+                CREATE TABLE IF NOT EXISTS kontrak (
+                    contract_id INT PRIMARY KEY AUTO_INCREMENT,
+                    staff_id INT NOT NULL,
+                    loan_term INT NOT NULL,
+                    status BOOLEAN NOT NULL,
+                    total_payment INT NOT NULL,
+                    loan_payment INT NOT NULL,
+                    remaining_installment INT NOT NULL,
+                    branch VARCHAR(50) NOT NULL,
+                    customer_name VARCHAR(50) NOT NULL,
+                    FOREIGN KEY (staff_id) REFERENCES %s(user_id)
+                )
+                """.formatted(config.getUsersTableName());
+
+            stmt.executeUpdate(sql);
+
+            if (config.isDebugMode()) {
+                System.out.println(" Kontrak table ready");
+                System.out.println("   - contract_id (Primary Key)");
+                System.out.println("   - staff_id (Foreign Key ke users)");
+                System.out.println("   - loan_term, status, total_payment, loan_payment, remaining_installment, branch, customer_name");
+            }
+        }
+    }
 }
