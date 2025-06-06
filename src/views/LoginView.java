@@ -41,8 +41,6 @@ public class LoginView extends BaseView {
                 g2d.setPaint(gp);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
 
-                // Gambar/logo custom (letakkan asset Anda di sini)
-                // Contoh: src/assets/login-illustration.png
                 ImageIcon img = new ImageIcon("src/assets/logo.png");
                 g.drawImage(img.getImage(), 0, 0, getWidth(), getHeight(), null);
             }

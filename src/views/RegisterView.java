@@ -30,8 +30,7 @@ public class RegisterView extends BaseView {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(null);
-        // Ganti dengan path icon Anda jika ada
-        // setIconImage(new ImageIcon(getClass().getResource("/assets/icon.png")).getImage());
+        setIconImage(new ImageIcon(getClass().getResource("/assets/icon.png")).getImage());
 
         int leftPanelWidth = 720;
         int rightPanelWidth = 414;
@@ -47,9 +46,8 @@ public class RegisterView extends BaseView {
                 GradientPaint gp = new GradientPaint(0, 0, color1, getWidth(), getHeight(), color2);
                 g2d.setPaint(gp);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
-                // Ganti dengan path logo Anda jika ada
-                // ImageIcon img = new ImageIcon(getClass().getResource("/assets/logo.png"));
-                // g.drawImage(img.getImage(), 0, 0, getWidth(), getHeight(), null);
+                ImageIcon img = new ImageIcon("src/assets/logo.png");
+                g.drawImage(img.getImage(), 0, 0, getWidth(), getHeight(), null);
             }
         };
         leftPanel.setBounds(0, 0, leftPanelWidth, AppConstants.WINDOW_HEIGHT);
@@ -112,7 +110,7 @@ public class RegisterView extends BaseView {
         rightPanel.add(usernameField);
         yPos += fieldHeight + gap;
 
-        // --- PERUBAHAN 3: Menggunakan JComboBox untuk Cabang ---
+        // JCombox (dropdown) untuk cabang
         JLabel branchLabel = new JLabel("Cabang");
         branchLabel.setFont(AppConstants.getMontserrat(14f, Font.PLAIN));
         branchLabel.setForeground(Color.GRAY);
@@ -170,7 +168,7 @@ public class RegisterView extends BaseView {
         rightPanel.add(registerButton);
         yPos += 42 + 15;
 
-        // --- PERUBAHAN 4: Menambahkan link kembali ke Login ---
+        // Bagian kembali ke login
         loginLabel = new JLabel("<html><span style='color:#888'>Sudah punya akun? </span><a href='#' style='color:#2b46bf'>Login</a></html>");
         loginLabel.setFont(AppConstants.getMontserrat(14f, Font.PLAIN));
         loginLabel.setBounds(40, yPos, rightPanelWidth - 80, 24);
@@ -208,13 +206,12 @@ public class RegisterView extends BaseView {
             return;
         }
 
-        // Branch dari JComboBox tidak mungkin kosong, jadi pengecekan branch.isEmpty() bisa dihilangkan
-        // Default role diset ke "staff", ini bisa diubah jika perlu
+        // Default role diset ke "staff"
         boolean success = authController.register(username, fullName, password, confirmPassword, User.ROLE_STAFF, branch);
         
         if (success) {
             showMessage("Registrasi berhasil! Silakan login dengan akun Anda.");
-            onLoginLinkClick(); // Langsung arahkan ke halaman login
+            onLoginLinkClick(); // refer ke login
         } else {
             showMessage("Registrasi gagal! Username mungkin sudah dipakai atau data tidak valid.");
         }
