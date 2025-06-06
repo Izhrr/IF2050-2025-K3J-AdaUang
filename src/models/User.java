@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import config.*;
 
 public class User extends BaseModel {
     private int id_user;           // Primary key
@@ -19,13 +20,13 @@ public class User extends BaseModel {
 
     private static DatabaseConfig config = DatabaseConfig.getInstance();
 
-    // Role constants
-    public static final String ROLE_USER = "user";
+    public static final String ROLE_STAFF = "staff";
     public static final String ROLE_ADMIN = "admin";
+    public static final String ROLE_MANAGER = "manager";
 
     // Constructors
     public User() {
-        this.role = ROLE_USER; // Default role
+        this.role = ROLE_STAFF; // Default role
     }
 
     public User(String username, String password) {
@@ -39,7 +40,7 @@ public class User extends BaseModel {
         this.fullname = fullname;
         this.password = password;
         this.branch = branch;
-        this.role = (role != null) ? role : ROLE_USER;
+        this.role = (role != null) ? role : ROLE_STAFF;
     }
 
     // CRUD Operations
@@ -206,14 +207,12 @@ public class User extends BaseModel {
 
     public static List<User> findAll() {
         List<User> users = new ArrayList<>();
-
         try {
-            String sql = "SELECT * FROM " + config.getUsersTableName() + " ORDER BY id_user DESC";
+            String sql = "SELECT * FROM " + config.getUsersTableName() + " ORDER BY id_user ASC";
 
             try (Connection conn = dbConnection.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(sql);
                  ResultSet rs = stmt.executeQuery()) {
-
                 while (rs.next()) {
                     users.add(createUserFromResultSet(rs));
                 }
@@ -223,7 +222,6 @@ public class User extends BaseModel {
                 System.err.println(" Error finding all users: " + e.getMessage());
             }
         }
-
         return users;
     }
 
@@ -274,7 +272,7 @@ public class User extends BaseModel {
                 password != null && !password.trim().isEmpty() &&
                 fullname != null && !fullname.trim().isEmpty() &&
                 branch != null && !branch.trim().isEmpty() &&
-                role != null && (role.equals(ROLE_USER) || role.equals(ROLE_ADMIN)) &&
+                role != null && (role.equals(ROLE_STAFF) || role.equals(ROLE_ADMIN) || role.equals(ROLE_MANAGER)) &&
                 username.length() >= 3 && username.length() <= 50 &&
                 password.length() >= 6;
     }
@@ -294,8 +292,12 @@ public class User extends BaseModel {
         return ROLE_ADMIN.equals(role);
     }
 
-    public boolean isUser() {
-        return ROLE_USER.equals(role);
+    public boolean isStaff() {
+        return ROLE_STAFF.equals(role);
+    }
+
+    public boolean isManager() {
+        return ROLE_MANAGER.equals(role);
     }
 
     // Getters and Setters

@@ -15,8 +15,8 @@ public class AuthService {
             return null;
         if (!password.equals(confirmPassword)) return null;
         if (User.usernameExists(username)) return null;
-        if (role == null || (!role.equals(User.ROLE_USER) && !role.equals(User.ROLE_ADMIN))) {
-            role = User.ROLE_USER;
+        if (role == null || (!role.equals(User.ROLE_STAFF) && !role.equals(User.ROLE_ADMIN) && !role.equals(User.ROLE_MANAGER))) {
+            role = User.ROLE_STAFF;
         }
         User user = new User(username, fullname, password, branch, role);
         if (!user.isValid()) return null;
