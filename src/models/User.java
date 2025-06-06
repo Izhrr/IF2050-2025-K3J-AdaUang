@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import config.*;
 
 public class User extends BaseModel {
     private int id_user;           // Primary key
