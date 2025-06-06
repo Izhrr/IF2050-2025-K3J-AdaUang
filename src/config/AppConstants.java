@@ -22,7 +22,8 @@ public class AppConstants {
     public static final String VERSION = "1.0.0";
     
     // User Roles
-    public static final String ROLE_USER = "user";
+    public static final String ROLE_STAFF = "staff";
+    public static final String ROLE_MANAGER = "manager";
     public static final String ROLE_ADMIN = "admin";
     
     // Validation Constants
