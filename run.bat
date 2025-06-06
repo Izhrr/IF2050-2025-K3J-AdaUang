@@ -17,4 +17,3 @@ if errorlevel 1 (
 
 echo [2] Running game...
 java -cp "bin;lib/mysql-connector-j-9.3.0.jar" AppLauncher
-pauseadad
