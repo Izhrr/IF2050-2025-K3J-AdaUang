@@ -80,8 +80,8 @@ public class DatabaseSeeder {
             Object[][] testUsers = {
                 {"admin", "Administrator", "admin123", "Jakarta", "admin"},
                 {"izhrr", "Izhrr - Project Lead", "izhrr123", "Bandung", "admin"},
-                {"testuser", "Test User", "password123", "Surabaya", "user"}, 
-                {"demo", "Demo Account", "demo123", "Jakarta", "user"}
+                {"testuser", "Test User", "password123", "Surabaya", "staff"}, 
+                {"demo", "Demo Account", "demo123", "Jakarta", "manager"}
             };
             
             for (Object[] user : testUsers) {
