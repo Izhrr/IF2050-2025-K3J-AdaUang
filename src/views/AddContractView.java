@@ -38,6 +38,10 @@ public class AddContractView extends JPanel {
         closeBtn.setForeground(new Color(39, 49, 157));
         closeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         closeBtn.setToolTipText("Tutup panel");
+        closeBtn.setBounds(480, 20, 40, 40);
+        closeBtn.addActionListener(e -> {
+            if (onClose != null) onClose.run();
+        });
         add(closeBtn);
 
         JLabel title = new JLabel("Tambah Kontrak");
@@ -67,7 +71,6 @@ public class AddContractView extends JPanel {
 
         buttonTambahkan.addActionListener(e -> handleSubmit());
         setBorder(BorderFactory.createMatteBorder(0, 2, 0, 0, new Color(230,230,230)));
-
     }
 
     private JTextField addInput(String label, String id, int y, int height, int width, boolean readonly) {
@@ -120,19 +123,27 @@ public class AddContractView extends JPanel {
         try {
             int tenorVal = Integer.parseInt(tenor);
             int totalVal = Integer.parseInt(total);
-            int jumlahBayarVal = 0; // default selalu 0
-            boolean statusVal = true; // status default 1/true (aktif)
+            int jumlahBayarVal = 0;
+            int jumlahBayarBungaVal = (int) Math.round(totalVal * 1.1);
+            int cicilanPerBulanVal = tenorVal != 0 ? jumlahBayarBungaVal / tenorVal : 0;
+            boolean statusVal = true;
+
+            // DEBUG
+            System.out.println("jumlahBayarBungaVal = " + jumlahBayarBungaVal);
+            System.out.println("cicilanPerBulanVal = " + cicilanPerBulanVal);
 
             Connection conn = DatabaseConnection.getInstance().getConnection();
-            String sql = "INSERT INTO kontrak (nama_user, total, tenor, jumlah_bayar, status, tanggal_pinjam, id_user) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO kontrak (nama_user, total, tenor, jumlah_bayar, jumlah_bayar_bunga, cicilan_per_bulan, status, tanggal_pinjam, id_user) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, namaUser);
                 stmt.setInt(2, totalVal);
                 stmt.setInt(3, tenorVal);
-                stmt.setInt(4, jumlahBayarVal); // Always 0
-                stmt.setBoolean(5, statusVal);
-                stmt.setDate(6, Date.valueOf(today));
-                stmt.setInt(7, idUser);
+                stmt.setInt(4, jumlahBayarVal);
+                stmt.setInt(5, jumlahBayarBungaVal);
+                stmt.setInt(6, cicilanPerBulanVal);
+                stmt.setBoolean(7, statusVal);
+                stmt.setDate(8, Date.valueOf(today));
+                stmt.setInt(9, idUser);
 
                 int result = stmt.executeUpdate();
                 if (result > 0) {

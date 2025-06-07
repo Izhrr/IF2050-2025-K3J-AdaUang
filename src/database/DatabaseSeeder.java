@@ -113,13 +113,14 @@ public class DatabaseSeeder {
             };
 
             for (Object[] kontrak : testContracts) {
-                int jumlah_bayar = (Integer) kontrak[3];
+                int total = (Integer) kontrak[1];
                 int tenor = (Integer) kontrak[2];
-                int jumlah_bayar_bunga = (int) Math.round(jumlah_bayar * 1.1);
+                int jumlah_bayar_bunga = (int) Math.round(total * 1.1);
                 int cicilan_per_bulan = tenor != 0 ? jumlah_bayar_bunga / tenor : 0;
+                int jumlah_bayar = (Integer) kontrak[3];
 
                 stmt.setString(1, (String) kontrak[0]); // nama_user
-                stmt.setInt(2, (Integer) kontrak[1]); // total
+                stmt.setInt(2, total); // total
                 stmt.setInt(3, tenor); // tenor
                 stmt.setInt(4, jumlah_bayar); // jumlah_bayar
                 stmt.setInt(5, jumlah_bayar_bunga); // jumlah_bayar_bunga
