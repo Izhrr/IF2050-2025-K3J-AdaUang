@@ -17,6 +17,8 @@ public class Contract extends BaseModel {
     private int total;
     private int tenor;
     private int jumlah_bayar;
+    private int jumlah_bayar_bunga;
+    private int cicilan_per_bulan;
     private boolean status;
     private Date tanggal_pinjam;
     private int id_user;
@@ -34,7 +36,7 @@ public class Contract extends BaseModel {
                 return insert();
             } else {
                 // logika update
-                return false; 
+                return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -43,24 +45,30 @@ public class Contract extends BaseModel {
     }
 
     private boolean insert() throws SQLException {
-        String sql = "INSERT INTO kontrak (nama_user, total, tenor, jumlah_bayar, status, tanggal_pinjam, id_user) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        // Hitung jumlah_bayar_bunga dan cicilan_per_bulan sebelum insert
+        this.jumlah_bayar_bunga = (int) Math.round(this.jumlah_bayar * 1.1);
+        this.cicilan_per_bulan = this.tenor != 0 ? this.jumlah_bayar_bunga / this.tenor : 0;
+
+        String sql = "INSERT INTO kontrak (nama_user, total, tenor, jumlah_bayar, jumlah_bayar_bunga, cicilan_per_bulan, status, tanggal_pinjam, id_user) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
+
             stmt.setString(1, this.nama_user);
             stmt.setInt(2, this.total);
             stmt.setInt(3, this.tenor);
             stmt.setInt(4, this.jumlah_bayar);
-            stmt.setBoolean(5, this.status);
-            stmt.setDate(6, new java.sql.Date(this.tanggal_pinjam.getTime()));
-            stmt.setInt(7, this.id_user);
+            stmt.setInt(5, this.jumlah_bayar_bunga);
+            stmt.setInt(6, this.cicilan_per_bulan);
+            stmt.setBoolean(7, this.status);
+            stmt.setDate(8, new java.sql.Date(this.tanggal_pinjam.getTime()));
+            stmt.setInt(9, this.id_user);
 
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         this.id_kontrak = generatedKeys.getInt(1);
-                        this.id = this.id_kontrak; // Sinkronkan dengan id di BaseModel
+                        this.id = this.id_kontrak;
                     }
                 }
                 return true;
@@ -68,13 +76,13 @@ public class Contract extends BaseModel {
         }
         return false;
     }
-    
+
     @Override
     public boolean delete() {
         // Logika hapus
         return false;
     }
-    
+
     @Override
     public boolean isNewRecord() {
         return id_kontrak == 0;
@@ -83,12 +91,12 @@ public class Contract extends BaseModel {
     public static List<Contract> findAllWithUserDetails() {
         List<Contract> contracts = new ArrayList<>();
         String sql = "SELECT k.*, u.username, u.branch FROM kontrak k " +
-                     "JOIN users u ON k.id_user = u.id_user ORDER BY k.id_kontrak ASC";
-        
+                "JOIN users u ON k.id_user = u.id_user ORDER BY k.id_kontrak ASC";
+
         try (Connection conn = dbConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            
+
             while (rs.next()) {
                 contracts.add(createFromResultSet(rs));
             }
@@ -105,6 +113,8 @@ public class Contract extends BaseModel {
         contract.setTotal(rs.getInt("total"));
         contract.setTenor(rs.getInt("tenor"));
         contract.setJumlah_bayar(rs.getInt("jumlah_bayar"));
+        contract.setJumlah_bayar_bunga(rs.getInt("jumlah_bayar_bunga"));
+        contract.setCicilan_per_bulan(rs.getInt("cicilan_per_bulan"));
         contract.setStatus(rs.getBoolean("status"));
         contract.setTanggal_pinjam(rs.getDate("tanggal_pinjam"));
         contract.setId_user(rs.getInt("id_user"));
@@ -116,11 +126,11 @@ public class Contract extends BaseModel {
     public static Contract findById(int id) {
         Contract contract = null;
         String sql = "SELECT k.*, u.username, u.branch FROM kontrak k " +
-                     "JOIN users u ON k.id_user = u.id_user WHERE k.id_kontrak = ?";
-        
+                "JOIN users u ON k.id_user = u.id_user WHERE k.id_kontrak = ?";
+
         try (Connection conn = dbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -137,6 +147,7 @@ public class Contract extends BaseModel {
     public String getFormattedTotal() {
         return NumberFormat.getCurrencyInstance(new Locale("id", "ID")).format(this.total);
     }
+
     public int getId_kontrak() { return id_kontrak; }
     public void setId_kontrak(int id_kontrak) { this.id_kontrak = id_kontrak; }
     public String getNama_user() { return nama_user; }
@@ -146,7 +157,16 @@ public class Contract extends BaseModel {
     public int getTenor() { return tenor; }
     public void setTenor(int tenor) { this.tenor = tenor; }
     public int getJumlah_bayar() { return jumlah_bayar; }
-    public void setJumlah_bayar(int jumlah_bayar) { this.jumlah_bayar = jumlah_bayar; }
+    public void setJumlah_bayar(int jumlah_bayar) {
+        this.jumlah_bayar = jumlah_bayar;
+        // Set otomatis nilai derived
+        this.jumlah_bayar_bunga = (int) Math.round(jumlah_bayar * 1.1);
+        this.cicilan_per_bulan = this.tenor != 0 ? this.jumlah_bayar_bunga / this.tenor : 0;
+    }
+    public int getJumlah_bayar_bunga() { return jumlah_bayar_bunga; }
+    public void setJumlah_bayar_bunga(int jumlah_bayar_bunga) { this.jumlah_bayar_bunga = jumlah_bayar_bunga; }
+    public int getCicilan_per_bulan() { return cicilan_per_bulan; }
+    public void setCicilan_per_bulan(int cicilan_per_bulan) { this.cicilan_per_bulan = cicilan_per_bulan; }
     public boolean isStatus() { return status; }
     public void setStatus(boolean status) { this.status = status; }
     public Date getTanggal_pinjam() { return tanggal_pinjam; }

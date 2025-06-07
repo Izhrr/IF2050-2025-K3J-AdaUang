@@ -104,8 +104,7 @@ public class DatabaseSeeder {
     private void insertTestContracts() throws SQLException {
         Connection conn = dbConnection.getConnection();
 
-        // Asumsi id_user 1, 2, 3, 4 sudah ada dari insertTestUsers
-        String sql = "INSERT INTO kontrak (nama_user, total, tenor, jumlah_bayar, status, tanggal_pinjam, id_user) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO kontrak (nama_user, total, tenor, jumlah_bayar, jumlah_bayar_bunga, cicilan_per_bulan, status, tanggal_pinjam, id_user) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             Object[][] testContracts = {
                 {"Budi Santoso", 12000000, 12, 1000000, true, LocalDate.of(2024, 12, 1), 1},
@@ -114,13 +113,20 @@ public class DatabaseSeeder {
             };
 
             for (Object[] kontrak : testContracts) {
+                int jumlah_bayar = (Integer) kontrak[3];
+                int tenor = (Integer) kontrak[2];
+                int jumlah_bayar_bunga = (int) Math.round(jumlah_bayar * 1.1);
+                int cicilan_per_bulan = tenor != 0 ? jumlah_bayar_bunga / tenor : 0;
+
                 stmt.setString(1, (String) kontrak[0]); // nama_user
                 stmt.setInt(2, (Integer) kontrak[1]); // total
-                stmt.setInt(3, (Integer) kontrak[2]); // tenor
-                stmt.setInt(4, (Integer) kontrak[3]); // jumlah_bayar
-                stmt.setBoolean(5, (Boolean) kontrak[4]); // status
-                stmt.setDate(6, Date.valueOf((LocalDate) kontrak[5])); // tgl_pinjem
-                stmt.setInt(7, (Integer) kontrak[6]); // id_user
+                stmt.setInt(3, tenor); // tenor
+                stmt.setInt(4, jumlah_bayar); // jumlah_bayar
+                stmt.setInt(5, jumlah_bayar_bunga); // jumlah_bayar_bunga
+                stmt.setInt(6, cicilan_per_bulan); // cicilan_per_bulan
+                stmt.setBoolean(7, (Boolean) kontrak[4]); // status
+                stmt.setDate(8, Date.valueOf((LocalDate) kontrak[5])); // tgl_pinjam
+                stmt.setInt(9, (Integer) kontrak[6]); // id_user
                 stmt.addBatch();
             }
             stmt.executeBatch();
