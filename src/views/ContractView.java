@@ -33,10 +33,12 @@ public class ContractView extends JPanel {
     private JPanel addContractPanel;
     private JPanel overlayPanel;
     private JTextField namaField, totalField, tenorField;
+    
 
     // Label di dalam panel detail
     private JLabel detailIdKontrak, detailNamaPeminjam, detailUsername, detailTotalPinjaman,
-                   detailTenor, detailJumlahBayar, detailStatus, detailTanggal, detailBranch;
+                   detailTenor, detailJumlahBayar, detailStatus, detailTanggal, detailBranch, 
+                   detailJumlahBayarTotal, detailCicilanPerBulan;;
 
 
     public ContractView(AuthController authController) {
@@ -238,15 +240,74 @@ public class ContractView extends JPanel {
             return label;
         }
     }
+    private JPanel createViewDetailPanel() {
+        JPanel panel = new JPanel(null);
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(new MatteBorder(0, 1, 0, 0, new Color(220, 220, 220)));
+        panel.setVisible(false);
+
+        ImageIcon closeIcon = createIcon("/assets/close_icon.png", 16, 16);
+        JButton closeButton = new JButton(closeIcon);
+        closeButton.setBounds(305, 15, 30, 30);
+        closeButton.setBorderPainted(false);
+        closeButton.setContentAreaFilled(false);
+        closeButton.addActionListener(e -> hideSidePanels());
+        panel.add(closeButton);
+
+        JLabel titleLabel = new JLabel("Detail Kontrak");
+        titleLabel.setFont(new Font("Montserrat", Font.BOLD, 22));
+        titleLabel.setForeground(new Color(39, 49, 157));
+        titleLabel.setBounds(30, 40, 250, 30);
+        panel.add(titleLabel);
+
+        int yPos = 90;
+        detailIdKontrak = addDetailRow(panel, "ID Kontrak", yPos); yPos += 55;
+        detailNamaPeminjam = addDetailRow(panel, "Nama Peminjam", yPos); yPos += 55;
+        detailUsername = addDetailRow(panel, "Username Staff (Pembuat)", yPos); yPos += 55;
+        detailBranch = addDetailRow(panel, "Cabang", yPos); yPos += 55;
+        detailTotalPinjaman = addDetailRow(panel, "Total Pinjaman", yPos); yPos += 55;
+        detailTenor = addDetailRow(panel, "Tenor", yPos); yPos += 55;
+        detailJumlahBayar = addDetailRow(panel, "Jumlah Terbayar", yPos); yPos += 55;
+
+        // Tambahkan dua row baru di bawah jumlah terbayar:
+        detailJumlahBayarTotal = addDetailRow(panel, "Jumlah Bayar Total", yPos); yPos += 55;
+        detailCicilanPerBulan = addDetailRow(panel, "Cicilan per Bulan", yPos); yPos += 55;
+
+        detailTanggal = addDetailRow(panel, "Tanggal Pinjam", yPos); yPos += 55;
+        detailStatus = addDetailRow(panel, "Status", yPos);
+
+        return panel;
+    }
+    private void showViewDetailPanel(int contractId) {
+        Contract contract = contractController.getContractById(contractId);
+        if (contract == null) {
+            JOptionPane.showMessageDialog(this, "Gagal memuat detail kontrak.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        detailIdKontrak.setText(String.valueOf(contract.getId_kontrak()));
+        detailNamaPeminjam.setText(contract.getNama_user());
+        detailUsername.setText(contract.getUsername());
+        detailTotalPinjaman.setText(contract.getFormattedTotal());
+        detailTenor.setText(contract.getTenor() + " Bulan");
+        detailJumlahBayar.setText(NumberFormat.getCurrencyInstance(new Locale("id", "ID")).format(contract.getJumlah_bayar()));
+
+        // Tambahan: tampilkan jumlah bayar total dan cicilan per bulan
+        detailJumlahBayarTotal.setText(NumberFormat.getCurrencyInstance(new Locale("id", "ID")).format(contract.getJumlah_bayar_bunga()));
+        detailCicilanPerBulan.setText(NumberFormat.getCurrencyInstance(new Locale("id", "ID")).format(contract.getCicilan_per_bulan()));
+
+        detailStatus.setText(contract.isStatus() ? "Aktif" : "Tidak Aktif");
+        detailTanggal.setText(new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID")).format(contract.getTanggal_pinjam()));
+        detailBranch.setText(contract.getBranch());
+
+        showSidePanel(viewDetailPanel);
+    }
 
     private void showPopupMenu(int row) { int contractId = (int) tableModel.getValueAt(row, 0); JPopupMenu menu = new JPopupMenu(); JMenuItem viewDetailItem = new JMenuItem("Lihat Detail Kontrak"); viewDetailItem.addActionListener(e -> showViewDetailPanel(contractId)); menu.add(viewDetailItem); Rectangle cellRect = contractTable.getCellRect(row, 6, true); menu.show(contractTable, cellRect.x - menu.getPreferredSize().width + cellRect.width, cellRect.y); }
-    private void showViewDetailPanel(int contractId) { Contract contract = contractController.getContractById(contractId); if (contract == null) { JOptionPane.showMessageDialog(this, "Gagal memuat detail kontrak.", "Error", JOptionPane.ERROR_MESSAGE); return; } detailIdKontrak.setText(String.valueOf(contract.getId_kontrak())); detailNamaPeminjam.setText(contract.getNama_user()); detailUsername.setText(contract.getUsername()); detailTotalPinjaman.setText(contract.getFormattedTotal()); detailTenor.setText(contract.getTenor() + " Bulan"); detailJumlahBayar.setText(NumberFormat.getCurrencyInstance(new Locale("id", "ID")).format(contract.getJumlah_bayar())); detailStatus.setText(contract.isStatus() ? "Aktif" : "Tidak Aktif"); detailTanggal.setText(new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID")).format(contract.getTanggal_pinjam())); detailBranch.setText(contract.getBranch()); showSidePanel(viewDetailPanel); }
     private void showAddContractPanel() { namaField.setText(""); totalField.setText(""); tenorField.setText(""); showSidePanel(addContractPanel); }
     private void showSidePanel(JPanel panelToShow) { hideSidePanels(); Dimension size = layeredPane.getSize(); overlayPanel.setBounds(0, 0, size.width, size.height); int panelWidth = 350; panelToShow.setBounds(size.width - panelWidth, 0, panelWidth, size.height); overlayPanel.setVisible(true); panelToShow.setVisible(true); layeredPane.moveToFront(overlayPanel); layeredPane.moveToFront(panelToShow); }
     private void hideSidePanels() { overlayPanel.setVisible(false); viewDetailPanel.setVisible(false); addContractPanel.setVisible(false); }
     private void handleSubmitContract() { try { String nama = namaField.getText().trim(); String totalStr = totalField.getText().trim(); String tenorStr = tenorField.getText().trim(); if (nama.isEmpty() || totalStr.isEmpty() || tenorStr.isEmpty()) { JOptionPane.showMessageDialog(this, "Semua field wajib diisi.", "Input Error", JOptionPane.WARNING_MESSAGE); return; } int total = Integer.parseInt(totalStr); int tenor = Integer.parseInt(tenorStr); User currentUser = authController.getCurrentUser(); if (currentUser == null) { JOptionPane.showMessageDialog(this, "Sesi tidak valid, silakan login ulang.", "Error", JOptionPane.ERROR_MESSAGE); return; } boolean success = contractController.addContract(nama, total, tenor, currentUser.getId_user()); if (success) { JOptionPane.showMessageDialog(this, "Kontrak baru berhasil ditambahkan.", "Sukses", JOptionPane.INFORMATION_MESSAGE); loadTableData(); hideSidePanels(); } else { JOptionPane.showMessageDialog(this, "Gagal menambah kontrak.", "Error", JOptionPane.ERROR_MESSAGE); } } catch (NumberFormatException e) { JOptionPane.showMessageDialog(this, "Total Pinjaman dan Tenor harus berupa angka.", "Format Error", JOptionPane.WARNING_MESSAGE); } }
     private JPanel createAddContractPanel() { JPanel panel = new JPanel(null); panel.setBackground(Color.WHITE); panel.setBorder(new MatteBorder(0, 1, 0, 0, new Color(220, 220, 220))); panel.setVisible(false); ImageIcon closeIcon = createIcon("/assets/close_icon.png", 16, 16); JButton closeButton = new JButton(closeIcon); closeButton.setBounds(305, 15, 30, 30); closeButton.setBorderPainted(false); closeButton.setContentAreaFilled(false); closeButton.addActionListener(e -> hideSidePanels()); panel.add(closeButton); JLabel titleLabel = new JLabel("Tambah Kontrak Baru"); titleLabel.setFont(new Font("Montserrat", Font.BOLD, 22)); titleLabel.setForeground(new Color(39, 49, 157)); titleLabel.setBounds(30, 40, 280, 30); panel.add(titleLabel); int yPos = 90; namaField = addFormField(panel, "Nama Peminjam", yPos); yPos += 75; totalField = addFormField(panel, "Total Pinjaman (Rp)", yPos); yPos += 75; tenorField = addFormField(panel, "Tenor (Bulan)", yPos); yPos += 75; JButton saveButton = new JButton("Tambahkan Kontrak"); saveButton.setFont(new Font("Montserrat", Font.BOLD, 16)); saveButton.setBackground(new Color(39, 49, 157)); saveButton.setForeground(Color.WHITE); saveButton.setBounds(30, yPos, 280, 45); saveButton.addActionListener(e -> handleSubmitContract()); panel.add(saveButton); return panel; }
-    private JPanel createViewDetailPanel() { JPanel panel = new JPanel(null); panel.setBackground(Color.WHITE); panel.setBorder(new MatteBorder(0, 1, 0, 0, new Color(220, 220, 220))); panel.setVisible(false); ImageIcon closeIcon = createIcon("/assets/close_icon.png", 16, 16); JButton closeButton = new JButton(closeIcon); closeButton.setBounds(305, 15, 30, 30); closeButton.setBorderPainted(false); closeButton.setContentAreaFilled(false); closeButton.addActionListener(e -> hideSidePanels()); panel.add(closeButton); JLabel titleLabel = new JLabel("Detail Kontrak"); titleLabel.setFont(new Font("Montserrat", Font.BOLD, 22)); titleLabel.setForeground(new Color(39, 49, 157)); titleLabel.setBounds(30, 40, 250, 30); panel.add(titleLabel); int yPos = 90; detailIdKontrak = addDetailRow(panel, "ID Kontrak", yPos); yPos += 55; detailNamaPeminjam = addDetailRow(panel, "Nama Peminjam", yPos); yPos += 55; detailUsername = addDetailRow(panel, "Username Staff (Pembuat)", yPos); yPos += 55; detailBranch = addDetailRow(panel, "Cabang", yPos); yPos += 55; detailTotalPinjaman = addDetailRow(panel, "Total Pinjaman", yPos); yPos += 55; detailTenor = addDetailRow(panel, "Tenor", yPos); yPos += 55; detailJumlahBayar = addDetailRow(panel, "Jumlah Terbayar", yPos); yPos += 55; detailTanggal = addDetailRow(panel, "Tanggal Pinjam", yPos); yPos += 55; detailStatus = addDetailRow(panel, "Status", yPos); return panel; }
     private JTextField addFormField(JPanel parent, String title, int y) { JLabel titleLabel = new JLabel(title); titleLabel.setFont(new Font("Montserrat", Font.PLAIN, 14)); titleLabel.setForeground(Color.GRAY); titleLabel.setBounds(30, y, 280, 20); parent.add(titleLabel); JTextField textField = new JTextField(); textField.setFont(new Font("Montserrat", Font.PLAIN, 16)); textField.setBounds(30, y + 25, 280, 40); parent.add(textField); return textField; }
     private JLabel addDetailRow(JPanel parent, String title, int y) { JLabel titleLabel = new JLabel(title); titleLabel.setFont(new Font("Montserrat", Font.PLAIN, 14)); titleLabel.setForeground(Color.GRAY); titleLabel.setBounds(30, y, 280, 20); parent.add(titleLabel); JLabel valueLabel = new JLabel("-"); valueLabel.setFont(new Font("Montserrat", Font.BOLD, 16)); valueLabel.setForeground(new Color(50, 50, 50)); valueLabel.setBounds(30, y + 20, 280, 25); parent.add(valueLabel); return valueLabel; }
     private ImageIcon createIcon(String path, int width, int height) { URL resource = getClass().getResource(path); if (resource == null) { System.err.println("Error: Icon resource not found at path: " + path); return new ImageIcon(new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)); } return new ImageIcon(new ImageIcon(resource).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)); }

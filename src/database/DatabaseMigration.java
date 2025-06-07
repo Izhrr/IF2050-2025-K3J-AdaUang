@@ -99,6 +99,8 @@ public class DatabaseMigration {
                     total INT NOT NULL,
                     tenor INT NOT NULL,
                     jumlah_bayar INT NOT NULL,
+                    jumlah_bayar_bunga INT NOT NULL,
+                    cicilan_per_bulan INT NOT NULL,
                     status BOOLEAN NOT NULL,
                     tanggal_pinjam DATE NOT NULL,
                     id_user INT NOT NULL,
@@ -115,6 +117,8 @@ public class DatabaseMigration {
                 System.out.println("   - total");
                 System.out.println("   - tenor");
                 System.out.println("   - jumlah_bayar");
+                System.out.println("   - jumlah_bayar_bunga");
+                System.out.println("   - cicilan_per_bulan");
                 System.out.println("   - status");
                 System.out.println("   - tanggal_pinjam");
                 System.out.println("   - id_user (Foreign Key ke users)");

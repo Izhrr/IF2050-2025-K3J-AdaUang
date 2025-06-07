@@ -3,7 +3,7 @@ package views;
 import controllers.AuthController;
 import controllers.UserController;
 import models.User;
-
+import config.AppConstants;
 import javax.swing.*;
 import java.awt.*;
 
@@ -21,7 +21,7 @@ public class MainView extends JFrame {
 
         setTitle("AdaUang - Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1200, 800);
+        setSize(AppConstants.WINDOW_WIDTH, AppConstants.WINDOW_HEIGHT);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         // Ganti dengan path icon Anda jika ada
