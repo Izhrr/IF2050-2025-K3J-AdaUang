@@ -43,15 +43,15 @@ public class Contract extends BaseModel {
             return false;
         }
     }
-
+    
     private boolean insert() throws SQLException {
-        // Hitung jumlah_bayar_bunga dan cicilan_per_bulan sebelum insert
-        this.jumlah_bayar_bunga = (int) Math.round(this.jumlah_bayar * 1.1);
+        // Perbaiki: Hitung jumlah_bayar_bunga dari total, bukan jumlah_bayar
+        this.jumlah_bayar_bunga = (int) Math.round(this.total * 1.1);
         this.cicilan_per_bulan = this.tenor != 0 ? this.jumlah_bayar_bunga / this.tenor : 0;
 
         String sql = "INSERT INTO kontrak (nama_user, total, tenor, jumlah_bayar, jumlah_bayar_bunga, cicilan_per_bulan, status, tanggal_pinjam, id_user) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, this.nama_user);
             stmt.setInt(2, this.total);
@@ -160,7 +160,7 @@ public class Contract extends BaseModel {
     public void setJumlah_bayar(int jumlah_bayar) {
         this.jumlah_bayar = jumlah_bayar;
         // Set otomatis nilai derived
-        this.jumlah_bayar_bunga = (int) Math.round(jumlah_bayar * 1.1);
+        this.jumlah_bayar_bunga = (int) Math.round(total * 1.1);
         this.cicilan_per_bulan = this.tenor != 0 ? this.jumlah_bayar_bunga / this.tenor : 0;
     }
     public int getJumlah_bayar_bunga() { return jumlah_bayar_bunga; }
