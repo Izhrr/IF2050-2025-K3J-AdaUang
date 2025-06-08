@@ -10,7 +10,7 @@ public class InstalmentController {
         this.instalmentService = new InstalmentService();
     }
 
-    public boolean tambahCicilan(int idKontrak, int jumlah, LocalDate tanggal) {
-        return instalmentService.addCicilan(idKontrak, jumlah, tanggal);
+    public boolean tambahCicilan(int idKontrak, int jumlah, LocalDate tanggal, int idStaff) {
+        return instalmentService.addCicilan(idKontrak, jumlah, tanggal, idStaff);
     }
 }

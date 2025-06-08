@@ -24,16 +24,12 @@ public class MainView extends JFrame {
         setSize(AppConstants.WINDOW_WIDTH, AppConstants.WINDOW_HEIGHT);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        // Ganti dengan path icon Anda jika ada
         setIconImage(new ImageIcon(getClass().getResource("/assets/icon.png")).getImage());
 
-        // Implementasi listener dengan method logoutRequested
         SidebarView.SidebarListener sidebarListener = new SidebarView.SidebarListener() {
             @Override
             public void menuSelected(String menuName) {
                 switchPanel(menuName);
-                System.out.println("Switching to panel: " + menuName);
-
             }
 
             @Override
@@ -48,17 +44,9 @@ public class MainView extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-          // Tambah panel Kontrak
-        ContractView contractView = new ContractView(authController);
-        contractView.setName("kontrak");
-        mainPanel.add(contractView);
+        mainPanel.add(new ContractView(authController), "kontrak");
+        mainPanel.add(new InstalmentView(authController), "cicilan"); // ✅ Benar
 
-        // Tambah panel Cicilan
-        InstalmentView instalmentView = new InstalmentView();
-        instalmentView.setName("cicilan");
-        mainPanel.add(instalmentView);
-
-        
         if (currentUser != null && "admin".equals(currentUser.getRole())) {
             mainPanel.add(new UserManagementView(userController, authController), "user_management");
         }
@@ -71,8 +59,7 @@ public class MainView extends JFrame {
             cardLayout.show(mainPanel, "kontrak");
         }
     }
-    
-    // Method baru untuk menangani proses logout
+
     private void handleLogout() {
         int response = JOptionPane.showConfirmDialog(
             this,
@@ -83,9 +70,9 @@ public class MainView extends JFrame {
         );
 
         if (response == JOptionPane.YES_OPTION) {
-            authController.logout(); // Hapus sesi user saat ini
-            new LoginView(authController).setVisible(true); // Tampilkan halaman login
-            this.dispose(); // Tutup window MainView
+            authController.logout();
+            new LoginView(authController).setVisible(true);
+            this.dispose();
         }
     }
 
@@ -99,8 +86,8 @@ public class MainView extends JFrame {
         }
         if (panelExists) {
             cardLayout.show(mainPanel, menuName);
-            mainPanel.revalidate();
-            mainPanel.repaint();
+            mainPanel.revalidate(); 
+            mainPanel.repaint();    
         } else {
             System.err.println("Panel dengan nama '" + menuName + "' tidak ditemukan.");
         }

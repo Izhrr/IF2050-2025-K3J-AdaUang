@@ -136,20 +136,24 @@ public class DatabaseMigration {
                     id_kontrak INT NOT NULL,
                     jumlah_cicilan INT NOT NULL,
                     tanggal_cicilan DATE NOT NULL,
-                    FOREIGN KEY (id_kontrak) REFERENCES kontrak(id_kontrak)
+                    id_staff INT NOT NULL,
+                    FOREIGN KEY (id_kontrak) REFERENCES kontrak(id_kontrak),
+                    FOREIGN KEY (id_staff) REFERENCES users(id_user)
                 )
                 """;
-                
+
             stmt.executeUpdate(sql);
 
             if (config.isDebugMode()) {
                 System.out.println(" Cicilan table ready");
                 System.out.println("   - id_cicilan (Primary Key)");
-                System.out.println("   - id_kontrak (Foreign Key ke kontrak)");
+                System.out.println("   - id_kontrak (FK ke kontrak)");
                 System.out.println("   - jumlah_cicilan");
                 System.out.println("   - tanggal_cicilan");
+                System.out.println("   - id_staff (FK ke users)");
             }
         }
     }
+
 
 }

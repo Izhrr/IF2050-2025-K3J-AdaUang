@@ -122,28 +122,61 @@ public class DatabaseSeeder {
     }
 
     private void insertTestInstalment() throws SQLException {
-        if (insertedContractIds.isEmpty()) return;
+        String sql = "INSERT INTO cicilan (id_kontrak, jumlah_cicilan, tanggal_cicilan, id_staff) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = dbConnection.getConnection().prepareStatement(sql)) {
 
-        Connection conn = dbConnection.getConnection();
-        String sql = "INSERT INTO cicilan (id_kontrak, jumlah_cicilan, tanggal_cicilan) VALUES (?, ?, ?)";
+            int idKontrakBudi = 1;
+            int jumlahCicilanBudi = 1100000;
+            int durasiBudi = 12;
+            int idStaffBudi = 1;
+            LocalDate mulaiBudi = LocalDate.of(2024, 12, 1);
 
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            LocalDate[] tanggal = {
-                    LocalDate.of(2025, 5, 10),
-                    LocalDate.of(2025, 7, 15),
-                    LocalDate.of(2025, 9, 20)
-            };
-
-            for (int i = 0; i < insertedContractIds.size(); i++) {
-                stmt.setInt(1, insertedContractIds.get(i));
-                stmt.setInt(2, 1100000);
-                stmt.setDate(3, Date.valueOf(tanggal[i % tanggal.length]));
-                stmt.addBatch();
+            for (int i = 0; i < durasiBudi; i++) {
+                stmt.setInt(1, idKontrakBudi);
+                stmt.setInt(2, jumlahCicilanBudi);
+                stmt.setDate(3, Date.valueOf(mulaiBudi.plusMonths(i)));
+                stmt.setInt(4, idStaffBudi);
+                stmt.executeUpdate();
             }
 
-            stmt.executeBatch();
+            int idKontrakSiti = 2;
+            int jumlahCicilanSiti = 2200000;
+            int idStaffSiti = 2;
+
+            stmt.setInt(1, idKontrakSiti);
+            stmt.setInt(2, jumlahCicilanSiti);
+            stmt.setDate(3, Date.valueOf(LocalDate.of(2024, 11, 15)));
+            stmt.setInt(4, idStaffSiti);
+            stmt.executeUpdate();
+
+            stmt.setInt(1, idKontrakSiti);
+            stmt.setInt(2, jumlahCicilanSiti);
+            stmt.setDate(3, Date.valueOf(LocalDate.of(2024, 12, 15)));
+            stmt.setInt(4, idStaffSiti);
+            stmt.executeUpdate();
+
+            stmt.setInt(1, idKontrakSiti);
+            stmt.setInt(2, jumlahCicilanSiti);
+            stmt.setDate(3, Date.valueOf(LocalDate.of(2025, 1, 15)));
+            stmt.setInt(4, idStaffSiti);
+            stmt.executeUpdate();
+
+            int idKontrakAgus = 3;
+            int jumlahCicilanAgus = 1100000;
+            int durasiAgus = 6;
+            int idStaffAgus = 3;
+            LocalDate mulaiAgus = LocalDate.of(2025, 1, 10);
+
+            for (int i = 0; i < durasiAgus; i++) {
+                stmt.setInt(1, idKontrakAgus);
+                stmt.setInt(2, jumlahCicilanAgus);
+                stmt.setDate(3, Date.valueOf(mulaiAgus.plusMonths(i)));
+                stmt.setInt(4, idStaffAgus);
+                stmt.executeUpdate();
+            }
         }
     }
+
 
     private void printSeededData() throws SQLException {
         Connection conn = dbConnection.getConnection();

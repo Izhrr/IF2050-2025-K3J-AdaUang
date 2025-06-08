@@ -49,6 +49,7 @@ public class ContractView extends JPanel {
         setOpaque(true);
         setBackground(new Color(248, 249, 251));
         setPreferredSize(new Dimension(1000, 700));
+        setName("kontrak"); 
 
         layeredPane = new JLayeredPane();
         layeredPane.setPreferredSize(new Dimension(1000, 700));
