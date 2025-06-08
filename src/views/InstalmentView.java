@@ -1,140 +1,136 @@
 package views;
 
-import config.AppConstants;
 import controllers.InstalmentController;
 import java.awt.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 public class InstalmentView extends JPanel {
-    private final JTextField inputIdKontrak;
-    private final JTextField inputJumlahCicilan;
-    private final JTextField inputTenor;
-    private final JTextField inputTanggal;
-    private final JButton buttonBayar;
-    private final JButton buttonCancelBayar;
-    private final JTable rtfDetailPembayaran;
-
     private final InstalmentController controller;
+    private JTextField inputIdKontrak, inputJumlah, inputTenor, inputTanggal;
+    private JTable cicilanTable;
 
     public InstalmentView() {
         this.controller = new InstalmentController();
-        setName("cicilan");
-        setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(900, 600));
-        setBackground(Color.WHITE);
 
-        // Panel isi
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setBorder(new EmptyBorder(30, 40, 30, 40));
-        contentPanel.setOpaque(true);
-        contentPanel.setBackground(Color.WHITE);
+        setLayout(null);
+        setBackground(new Color(248, 249, 251));
+        setPreferredSize(new Dimension(1000, 700));
 
-        JLabel header = new JLabel("Detail Pembayaran Cicilan");
-        header.setFont(AppConstants.getMontserrat(24f, Font.BOLD));
-        header.setForeground(new Color(43, 70, 191));
-        header.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(header);
-        contentPanel.add(Box.createVerticalStrut(20));
+        // Header
+        JLabel titleLabel = new JLabel("Pembayaran Cicilan");
+        titleLabel.setFont(new Font("Montserrat", Font.BOLD, 28));
+        titleLabel.setForeground(new Color(43, 70, 191));
+        titleLabel.setBounds(32, 24, 600, 40);
+        add(titleLabel);
 
-        // Form
-        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 15));
-        formPanel.setOpaque(false);
-        formPanel.setMaximumSize(new Dimension(600, 160));
+        // Form Panel
+        JPanel formPanel = new JPanel(null);
+        formPanel.setBackground(Color.WHITE);
+        formPanel.setBounds(32, 90, 936, 200);
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(230, 230, 230)),
+            new EmptyBorder(20, 20, 20, 20)
+        ));
+        add(formPanel);
 
-        formPanel.add(new JLabel("ID Kontrak"));
+        int labelWidth = 150;
+        int inputWidth = 250;
+        int rowHeight = 35;
+
+        // ID Kontrak
+        JLabel idLabel = new JLabel("ID Kontrak");
+        idLabel.setBounds(20, 10, labelWidth, rowHeight);
+        formPanel.add(idLabel);
+
         inputIdKontrak = new JTextField();
+        inputIdKontrak.setBounds(180, 10, inputWidth, rowHeight);
         formPanel.add(inputIdKontrak);
 
-        formPanel.add(new JLabel("Jumlah Cicilan"));
-        inputJumlahCicilan = new JTextField();
-        formPanel.add(inputJumlahCicilan);
+        // Jumlah Cicilan
+        JLabel jumlahLabel = new JLabel("Jumlah Cicilan");
+        jumlahLabel.setBounds(20, 55, labelWidth, rowHeight);
+        formPanel.add(jumlahLabel);
 
-        formPanel.add(new JLabel("Tenor"));
+        inputJumlah = new JTextField();
+        inputJumlah.setBounds(180, 55, inputWidth, rowHeight);
+        formPanel.add(inputJumlah);
+
+        // Tenor
+        JLabel tenorLabel = new JLabel("Tenor");
+        tenorLabel.setBounds(20, 100, labelWidth, rowHeight);
+        formPanel.add(tenorLabel);
+
         inputTenor = new JTextField();
+        inputTenor.setBounds(180, 100, inputWidth, rowHeight);
         formPanel.add(inputTenor);
 
-        formPanel.add(new JLabel("Tanggal (yyyy-mm-dd)"));
+        // Tanggal
+        JLabel tanggalLabel = new JLabel("Tanggal (yyyy-mm-dd)");
+        tanggalLabel.setBounds(20, 145, labelWidth, rowHeight);
+        formPanel.add(tanggalLabel);
+
         inputTanggal = new JTextField();
+        inputTanggal.setBounds(180, 145, inputWidth, rowHeight);
         formPanel.add(inputTanggal);
 
-        contentPanel.add(formPanel);
-        contentPanel.add(Box.createVerticalStrut(20));
-
-        // Tabel ringkasan
-        JLabel tabelLabel = new JLabel("Ringkasan Pembayaran");
-        tabelLabel.setFont(AppConstants.getMontserrat(16f, Font.BOLD));
-        tabelLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(tabelLabel);
-        contentPanel.add(Box.createVerticalStrut(10));
-
-        String[] columns = {"ID Kontrak", "Jumlah", "Tenor", "Tanggal"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0);
-        rtfDetailPembayaran = new JTable(model);
-        JScrollPane scrollPane = new JScrollPane(rtfDetailPembayaran);
-        scrollPane.setPreferredSize(new Dimension(800, 100));
-        contentPanel.add(scrollPane);
-        contentPanel.add(Box.createVerticalStrut(20));
-
         // Tombol
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.setOpaque(false);
-
-        buttonCancelBayar = new JButton("Cancel");
-        buttonCancelBayar.setBackground(new Color(220, 53, 69));
-        buttonCancelBayar.setForeground(Color.WHITE);
-
-        buttonBayar = new JButton("Bayar");
+        JButton buttonBayar = new JButton("Bayar");
+        buttonBayar.setBounds(700, 145, 100, 35);
         buttonBayar.setBackground(new Color(40, 167, 69));
         buttonBayar.setForeground(Color.WHITE);
+        buttonBayar.setFocusPainted(false);
+        formPanel.add(buttonBayar);
 
-        buttonPanel.add(buttonCancelBayar);
-        buttonPanel.add(buttonBayar);
-        contentPanel.add(buttonPanel);
+        JButton buttonCancel = new JButton("Cancel");
+        buttonCancel.setBounds(810, 145, 100, 35);
+        buttonCancel.setBackground(new Color(220, 53, 69));
+        buttonCancel.setForeground(Color.WHITE);
+        buttonCancel.setFocusPainted(false);
+        formPanel.add(buttonCancel);
 
-        // Tambahkan contentPanel ke view utama
-        add(contentPanel, BorderLayout.CENTER);
+        // Tabel Ringkasan
+        String[] columnNames = {"ID Kontrak", "Jumlah", "Tenor", "Tanggal"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        cicilanTable = new JTable(model);
 
-        // Event listener
-        buttonBayar.addActionListener(e -> handleBayar());
-        buttonCancelBayar.addActionListener(e -> clearForm());
+        JScrollPane tableScroll = new JScrollPane(cicilanTable);
+        tableScroll.setBounds(32, 320, 936, 320);
+        tableScroll.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        add(tableScroll);
 
-        // Debug
-        System.out.println("InstalmentView berhasil dimuat dengan komponen: " + contentPanel.getComponentCount());
+        // Event
+        buttonBayar.addActionListener(e -> handleBayar(model));
+        buttonCancel.addActionListener(e -> clearForm(model));
     }
 
-    private void handleBayar() {
+    private void handleBayar(DefaultTableModel model) {
         try {
             int idKontrak = Integer.parseInt(inputIdKontrak.getText().trim());
-            int jumlah = Integer.parseInt(inputJumlahCicilan.getText().trim());
+            int jumlah = Integer.parseInt(inputJumlah.getText().trim());
             String tenor = inputTenor.getText().trim();
             LocalDate tanggal = LocalDate.parse(inputTanggal.getText().trim());
 
             boolean success = controller.tambahCicilan(idKontrak, jumlah, tanggal);
             if (success) {
-                DefaultTableModel model = (DefaultTableModel) rtfDetailPembayaran.getModel();
                 model.setRowCount(0);
                 model.addRow(new Object[]{idKontrak, jumlah, tenor + " Bulan", tanggal});
                 JOptionPane.showMessageDialog(this, "Cicilan berhasil disimpan.");
             } else {
-                JOptionPane.showMessageDialog(this, "Gagal menyimpan cicilan. Periksa ID Kontrak.");
+                JOptionPane.showMessageDialog(this, "Gagal menyimpan cicilan. Periksa ID kontrak.");
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "ID kontrak dan jumlah harus berupa angka.");
-        } catch (DateTimeParseException e) {
-            JOptionPane.showMessageDialog(this, "Format tanggal salah. Gunakan yyyy-mm-dd.");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Input tidak valid. Pastikan semua field terisi dengan benar.");
         }
     }
 
-    private void clearForm() {
+    private void clearForm(DefaultTableModel model) {
         inputIdKontrak.setText("");
-        inputJumlahCicilan.setText("");
+        inputJumlah.setText("");
         inputTenor.setText("");
         inputTanggal.setText("");
-        ((DefaultTableModel) rtfDetailPembayaran.getModel()).setRowCount(0);
+        model.setRowCount(0);
     }
 }
