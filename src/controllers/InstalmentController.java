@@ -5,21 +5,25 @@ import services.InstalmentService;
 import java.util.List;
 
 public class InstalmentController extends BaseController {
+
     private final InstalmentService instalmentService;
 
     public InstalmentController() {
         this.instalmentService = new InstalmentService();
     }
-
-    public boolean tambahCicilan(int idKontrak, int jumlahBayar) {
-        return instalmentService.createInstalment(idKontrak, jumlahBayar);
+    
+    public List<Instalment> getAllInstalments() {
+        return instalmentService.getAllInstalments();
     }
 
-    public List<Instalment> getCicilanByKontrak(int idKontrak) {
-        return instalmentService.getInstalmentsByContract(idKontrak);
+    public boolean addInstalment(int id_cicilan, int id_kontrak, int jumlah_cicilan) {
+        if (id_cicilan <= 0 || id_kontrak <= 0 || jumlah_cicilan <= 0) {
+            return false;
+        }
+        return instalmentService.createInstalment(id_cicilan, id_kontrak, jumlah_cicilan);
     }
 
-    public Instalment getCicilanById(int idCicilan) {
-        return instalmentService.getInstalmentById(idCicilan);
+    public Instalment getInstalmentById(int id) {
+        return instalmentService.getInstalmentById(id);
     }
 }
