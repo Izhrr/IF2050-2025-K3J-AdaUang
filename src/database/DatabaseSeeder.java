@@ -31,6 +31,7 @@ public class DatabaseSeeder {
                 System.out.println(" Database seeding completed successfully!");
                 printSeededData();
                 printSeededInstalment();
+                printSeededContract();
             }
 
             return true;
@@ -190,12 +191,44 @@ public class DatabaseSeeder {
                         rs.getInt("id_cicilan"),
                         rs.getInt("id_kontrak"),
                         rs.getString("nama_user"),
-                        rs.getInt("jumlah_cicilan"),
+                        rs.getInt("jumlah_cicilan"), // kolom database tetap sama
                         rs.getDate("tanggal_cicilan").toString()
                 );
             }
         }
     }
+
+    private void printSeededContract() throws SQLException {
+        Connection conn = dbConnection.getConnection();
+        String sql = """
+            SELECT k.id_kontrak, k.nama_user, k.total, k.tenor, k.jumlah_bayar_bunga, k.cicilan_per_bulan, k.status, k.tanggal_pinjam, u.fullname
+            FROM kontrak k
+            JOIN %s u ON k.id_user = u.id_user
+            ORDER BY k.id_kontrak ASC
+            """.formatted(config.getUsersTableName());
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()) {
+
+            System.out.println("\n SEEDED CONTRACT DATA:");
+            System.out.println("ID | Nama Peminjam       | Total Pinjaman | Tenor | Total Bayar | Cicilan/Bulan | Status   | Tanggal Pinjam");
+            System.out.println("-----------------------------------------------------------------------------------------------------------");
+
+            while (rs.next()) {
+                System.out.printf("%-2d | %-20s | Rp%-13d | %-5d | Rp%-11d | Rp%-13d | %-8s | %s%n",
+                    rs.getInt("id_kontrak"),
+                    rs.getString("nama_user"),
+                    rs.getInt("total"),
+                    rs.getInt("tenor"),
+                    rs.getInt("jumlah_bayar_bunga"),
+                    rs.getInt("cicilan_per_bulan"),
+                    rs.getBoolean("status") ? "LUNAS" : "BELUM",
+                    rs.getDate("tanggal_pinjam").toString()
+                );
+            }
+        }
+    }
+
 
     private String getPasswordHint(String username) {
         return switch (username) {
