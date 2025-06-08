@@ -125,4 +125,30 @@ public class DatabaseMigration {
             }
         }
     }
+
+    private void createInstalmentTable() throws SQLException {
+        Connection conn = dbConnection.getConnection();
+        try (Statement stmt = conn.createStatement()) {
+            String sql = """
+                CREATE TABLE IF NOT EXISTS cicilan (
+                    id_cicilan INT PRIMARY KEY AUTO_INCREMENT,
+                    id_kontrak INT NOT NULL,
+                    jumlah_cicilan INT NOT NULL,
+                    tanggal_cicilan DATE NOT NULL,
+                    FOREIGN KEY (id_kontrak) REFERENCES %s(id_kontrak)
+                )
+                """.formatted(config.getUsersTableName());
+
+            stmt.executeUpdate(sql);
+
+            if (config.isDebugMode()) {
+                System.out.println(" Cicilan table ready");
+                System.out.println("   - id_cicilan (Primary Key)");
+                System.out.println("   - id_kontrak (Foreign Key ke kontrak)");
+                System.out.println("   - jumlah_cicilan");
+                System.out.println("   - tanggal_cicilan");
+            }
+        }
+    }
+
 }

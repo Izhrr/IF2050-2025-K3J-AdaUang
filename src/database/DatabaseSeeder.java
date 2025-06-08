@@ -133,6 +133,33 @@ public class DatabaseSeeder {
             stmt.executeBatch();
         }
     }
+
+    private void insertTestInstalment() throws SQLException {
+        Connection conn = dbConnection.getConnection();
+
+        String sql = "INSERT INTO cicilan (id_cicilan, id_kontrak, jumlah_cicilan, tanggal_cicilan) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Object[][] testInstalment = {
+                {1, 2, 1100000, LocalDate.of(2025, 5, 10), 1},
+                {3, 4, 1100000, LocalDate.of(2025, 7, 15), 2},
+                {5, 6, 1100000, LocalDate.of(2025, 9, 20), 3},
+            };
+
+            for (Object[] cicilan : testInstalment) {
+                int id_cicilan = (Integer) cicilan[0];
+                int id_kontrak = (Integer) cicilan[1];
+                int jumlah_cicilan = (Integer) cicilan[2];
+                LocalDate tanggal_cicilan = (LocalDate) cicilan[3];
+
+                stmt.setInt(1, id_cicilan); // id cicilan
+                stmt.setInt(2, id_kontrak); // id kontrak
+                stmt.setInt(3, jumlah_cicilan); // cicilan
+                stmt.setDate(4, Date.valueOf(tanggal_cicilan)); // tanggal_cicilan
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        }
+    }
     
     private void printSeededData() throws SQLException {
         Connection conn = dbConnection.getConnection();
