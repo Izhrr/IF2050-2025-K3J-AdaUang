@@ -22,35 +22,35 @@ public class InstalmentView extends JPanel {
 
         setLayout(null);
         setBackground(new Color(248, 249, 251));
-        setPreferredSize(new Dimension(800, 600)); // Kurangi dari 1000x700
+        setPreferredSize(new Dimension(850, 650)); 
         setVisible(true);
         setName("cicilan");
 
         JLabel titleLabel = new JLabel("Pembayaran Cicilan");
-        titleLabel.setFont(new Font("Montserrat", Font.BOLD, 28));
-        titleLabel.setForeground(new Color(43, 70, 191));
-        titleLabel.setBounds(32, 24, 400, 40); // Kurangi width
+        titleLabel.setFont(new Font("Montserrat", Font.BOLD, 32)); 
+        titleLabel.setForeground(new Color(39, 49, 157)); 
+        titleLabel.setBounds(32, 24, 400, 40);
         add(titleLabel);
 
         JPanel formPanel = new JPanel(null);
         formPanel.setBackground(Color.WHITE);
-        formPanel.setBounds(32, 90, 750, 180); // Kurangi dari 936x200 ke 750x180
+        formPanel.setBounds(32, 90, 780, 190);
         formPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(230, 230, 230)),
-                new EmptyBorder(15, 15, 15, 15) // Kurangi padding
+                new EmptyBorder(15, 15, 15, 15)
         ));
         add(formPanel);
 
-        int labelWidth = 120; // Kurangi dari 150
-        int inputWidth = 200; // Kurangi dari 250
-        int rowHeight = 30; // Kurangi dari 35
+        int labelWidth = 180; 
+        int inputWidth = 220; 
+        int rowHeight = 30;
 
         JLabel idLabel = new JLabel("ID Kontrak");
         idLabel.setBounds(20, 10, labelWidth, rowHeight);
         formPanel.add(idLabel);
 
         inputIdKontrak = new JTextField();
-        inputIdKontrak.setBounds(150, 10, inputWidth, rowHeight);
+        inputIdKontrak.setBounds(210, 10, inputWidth, rowHeight); 
         formPanel.add(inputIdKontrak);
 
         JLabel jumlahLabel = new JLabel("Jumlah Cicilan");
@@ -58,7 +58,7 @@ public class InstalmentView extends JPanel {
         formPanel.add(jumlahLabel);
 
         inputJumlah = new JTextField();
-        inputJumlah.setBounds(150, 50, inputWidth, rowHeight);
+        inputJumlah.setBounds(210, 50, inputWidth, rowHeight);
         formPanel.add(inputJumlah);
 
         JLabel tenorLabel = new JLabel("Tenor");
@@ -66,7 +66,7 @@ public class InstalmentView extends JPanel {
         formPanel.add(tenorLabel);
 
         inputTenor = new JTextField();
-        inputTenor.setBounds(150, 90, inputWidth, rowHeight);
+        inputTenor.setBounds(210, 90, inputWidth, rowHeight); 
         formPanel.add(inputTenor);
 
         JLabel tanggalLabel = new JLabel("Tanggal (yyyy-mm-dd)");
@@ -74,11 +74,11 @@ public class InstalmentView extends JPanel {
         formPanel.add(tanggalLabel);
 
         inputTanggal = new JTextField();
-        inputTanggal.setBounds(150, 130, inputWidth, rowHeight);
+        inputTanggal.setBounds(210, 130, inputWidth, rowHeight); 
         formPanel.add(inputTanggal);
 
         JButton buttonBayar = new JButton("Bayar");
-        buttonBayar.setBounds(520, 50, 80, 30); // Posisi dan ukuran lebih kecil
+        buttonBayar.setBounds(520, 50, 80, 30);
         buttonBayar.setBackground(new Color(40, 167, 69));
         buttonBayar.setForeground(Color.WHITE);
         buttonBayar.setFont(new Font("Montserrat", Font.BOLD, 12));
@@ -88,7 +88,7 @@ public class InstalmentView extends JPanel {
         formPanel.add(buttonBayar);
 
         JButton buttonCancel = new JButton("Batal");
-        buttonCancel.setBounds(610, 50, 80, 30); // Posisi dan ukuran lebih kecil
+        buttonCancel.setBounds(610, 50, 80, 30); 
         buttonCancel.setBackground(new Color(220, 53, 69));
         buttonCancel.setForeground(Color.WHITE);
         buttonCancel.setFont(new Font("Montserrat", Font.BOLD, 12));
@@ -102,7 +102,7 @@ public class InstalmentView extends JPanel {
         cicilanTable = new JTable(model);
 
         JScrollPane tableScroll = new JScrollPane(cicilanTable);
-        tableScroll.setBounds(32, 290, 750, 250); // Kurangi dari 936x320
+        tableScroll.setBounds(32, 300, 780, 280); 
         tableScroll.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
         add(tableScroll);
 
