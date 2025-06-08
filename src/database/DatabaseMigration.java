@@ -2,8 +2,8 @@ package database;
 
 import config.DatabaseConfig;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DatabaseMigration {
     private DatabaseConfig config;
@@ -26,6 +26,7 @@ public class DatabaseMigration {
             // Create tables
             createUsersTable();
             createContractsTable();
+            createInstalmentTable();
             
             // // Create indexes
             // createIndexes();
@@ -135,10 +136,10 @@ public class DatabaseMigration {
                     id_kontrak INT NOT NULL,
                     jumlah_cicilan INT NOT NULL,
                     tanggal_cicilan DATE NOT NULL,
-                    FOREIGN KEY (id_kontrak) REFERENCES %s(id_kontrak)
+                    FOREIGN KEY (id_kontrak) REFERENCES kontrak(id_kontrak)
                 )
-                """.formatted(config.getUsersTableName());
-
+                """;
+                
             stmt.executeUpdate(sql);
 
             if (config.isDebugMode()) {
