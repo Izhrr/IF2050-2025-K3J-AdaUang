@@ -1,13 +1,13 @@
 package views;
 
-import models.User;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import models.User;
 
 public class SidebarView extends JPanel {
 
@@ -58,9 +58,11 @@ public class SidebarView extends JPanel {
                     break;
                 case User.ROLE_STAFF:
                     topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Manajemen Kontrak", "kontrak"));
+                    topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Manajemen Cicilan", "cicilan"));
                     break;
                 case User.ROLE_MANAGER:
                     topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Manajemen Kontrak", "kontrak"));
+                    topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Manajemen Cicilan", "cicilan"));
                     break;
             }
         }

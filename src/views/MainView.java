@@ -1,11 +1,11 @@
 package views;
 
+import config.AppConstants;
 import controllers.AuthController;
 import controllers.UserController;
-import models.User;
-import config.AppConstants;
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
+import models.User;
 
 public class MainView extends JFrame {
     private CardLayout cardLayout;
@@ -32,6 +32,8 @@ public class MainView extends JFrame {
             @Override
             public void menuSelected(String menuName) {
                 switchPanel(menuName);
+                System.out.println("Switching to panel: " + menuName);
+
             }
 
             @Override
@@ -46,7 +48,16 @@ public class MainView extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        mainPanel.add(new ContractView(authController), "kontrak");
+          // Tambah panel Kontrak
+        ContractView contractView = new ContractView(authController);
+        contractView.setName("kontrak");
+        mainPanel.add(contractView);
+
+        // Tambah panel Cicilan
+        InstalmentView instalmentView = new InstalmentView();
+        instalmentView.setName("cicilan");
+        mainPanel.add(instalmentView);
+
         
         if (currentUser != null && "admin".equals(currentUser.getRole())) {
             mainPanel.add(new UserManagementView(userController, authController), "user_management");
@@ -88,6 +99,8 @@ public class MainView extends JFrame {
         }
         if (panelExists) {
             cardLayout.show(mainPanel, menuName);
+            mainPanel.revalidate();
+            mainPanel.repaint();
         } else {
             System.err.println("Panel dengan nama '" + menuName + "' tidak ditemukan.");
         }
