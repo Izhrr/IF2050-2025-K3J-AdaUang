@@ -1,12 +1,13 @@
 package views;
 
-import config.AppConstants;
 import controllers.AuthController;
+import config.AppConstants;
+import models.User;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.*;
-import models.User;
 
 public class RegisterView extends BaseView {
     private final JTextField fullNameField;
@@ -164,7 +165,6 @@ public class RegisterView extends BaseView {
         registerButton.setFont(AppConstants.getMontserrat(18f, Font.BOLD));
         registerButton.setFocusPainted(false);
         registerButton.setBorder(BorderFactory.createEmptyBorder());
-        registerButton.setOpaque(true);
         rightPanel.add(registerButton);
         yPos += 42 + 15;
 
