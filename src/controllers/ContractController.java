@@ -26,4 +26,8 @@ public class ContractController extends BaseController {
     public Contract getContractById(int id) {
         return contractService.getContractById(id);
     }
+
+    public boolean updateContract(Contract contract) {
+    return contractService.updateContract(contract);
+}
 }
