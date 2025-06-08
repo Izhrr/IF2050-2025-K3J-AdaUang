@@ -25,4 +25,8 @@ public class ContractService {
     public Contract getContractById(int id) {
         return Contract.findById(id);
     }
+
+    public boolean updateContract(Contract contract) {
+    return contract.save();
+}
 }
