@@ -1,10 +1,9 @@
 package views;
 
-import controllers.AuthController;
 import config.AppConstants;
-
-import javax.swing.*;
+import controllers.AuthController;
 import java.awt.*;
+import javax.swing.*;
 
 public class LoginView extends BaseView {
     private final JTextField usernameField;
@@ -96,6 +95,7 @@ public class LoginView extends BaseView {
         passwordField.setFont(AppConstants.getMontserrat(16f, Font.PLAIN));
         passwordField.setBackground(new Color(250, 250, 250));
         passwordField.setBorder(BorderFactory.createLineBorder(new Color(210, 210, 210), 2));
+        passwordField.setEchoChar('*');
         rightPanel.add(passwordField);
 
         // Tombol Login
@@ -106,6 +106,7 @@ public class LoginView extends BaseView {
         loginButton.setFont(AppConstants.getMontserrat(18f, Font.BOLD));
         loginButton.setFocusPainted(false);
         loginButton.setBorder(BorderFactory.createEmptyBorder());
+        loginButton.setOpaque(true);
         rightPanel.add(loginButton);
 
         // Register link
