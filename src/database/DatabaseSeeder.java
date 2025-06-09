@@ -88,9 +88,12 @@ public class DatabaseSeeder {
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             Object[][] testContracts = {
-                    {"Budi Santoso", 12000000, 12, 1000000, true, LocalDate.of(2024, 12, 1), 1},
-                    {"Siti Aminah", 48000000, 24, 2000000, false, LocalDate.of(2024, 11, 15), 2},
-                    {"Agus Wijaya", 6000000, 6, 1000000, true, LocalDate.of(2025, 1, 10), 3}
+                    {"Andi Setiawan", 12000000, 12, 8800000, true, LocalDate.of(2024, 12, 1), 1},
+                    {"Budi Santoso", 24000000, 24, 8800000, true, LocalDate.of(2024, 10, 15), 1},
+                    {"Siti Aminah", 18000000, 18, 5940000, true, LocalDate.of(2024, 9, 1), 2},
+                    {"Dedi Kurniawan", 15000000, 15, 4950000, true, LocalDate.of(2024, 7, 10), 2},
+                    {"Eka Pratama", 6000000, 6, 6600000, false, LocalDate.of(2024, 6, 1), 3},
+                    {"Farah Nabila", 9000000, 9, 5940000, true, LocalDate.of(2025, 4, 1), 3},
             };
 
             for (Object[] kontrak : testContracts) {
@@ -125,58 +128,105 @@ public class DatabaseSeeder {
         String sql = "INSERT INTO cicilan (id_kontrak, jumlah_cicilan, tanggal_cicilan, id_staff) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = dbConnection.getConnection().prepareStatement(sql)) {
 
-            int idKontrakBudi = 1;
-            int jumlahCicilanBudi = 1100000;
-            int durasiBudi = 12;
-            int idStaffBudi = 1;
-            LocalDate mulaiBudi = LocalDate.of(2024, 12, 1);
-
-            for (int i = 0; i < durasiBudi; i++) {
-                stmt.setInt(1, idKontrakBudi);
-                stmt.setInt(2, jumlahCicilanBudi);
-                stmt.setDate(3, Date.valueOf(mulaiBudi.plusMonths(i)));
-                stmt.setInt(4, idStaffBudi);
-                stmt.executeUpdate();
-            }
-
-            int idKontrakSiti = 2;
-            int jumlahCicilanSiti = 2200000;
-            int idStaffSiti = 2;
-
-            stmt.setInt(1, idKontrakSiti);
-            stmt.setInt(2, jumlahCicilanSiti);
-            stmt.setDate(3, Date.valueOf(LocalDate.of(2024, 11, 15)));
-            stmt.setInt(4, idStaffSiti);
+        // Kontrak 1 (Andi) - Tunggakan 1 bulan
+        // Kontrak mulai Des 2024, bayar sampai Apr 2025, current Juni 2025 = telat 1 bulan
+        int[] cicilanAndi = {1100000, 1100000, 1100000, 1100000, 1100000}; // Des-Apr
+        LocalDate[] tanggalAndi = {
+            LocalDate.of(2024, 12, 1), LocalDate.of(2025, 1, 1), 
+            LocalDate.of(2025, 2, 1), LocalDate.of(2025, 3, 1), 
+            LocalDate.of(2025, 4, 1)
+        };
+        
+        for (int i = 0; i < cicilanAndi.length; i++) {
+            stmt.setInt(1, 1); // id_kontrak Andi
+            stmt.setInt(2, cicilanAndi[i]);
+            stmt.setDate(3, Date.valueOf(tanggalAndi[i]));
+            stmt.setInt(4, 1); // id_staff
             stmt.executeUpdate();
+        }
 
-            stmt.setInt(1, idKontrakSiti);
-            stmt.setInt(2, jumlahCicilanSiti);
-            stmt.setDate(3, Date.valueOf(LocalDate.of(2024, 12, 15)));
-            stmt.setInt(4, idStaffSiti);
+        // Kontrak 2 (Budi) - Tunggakan 2 bulan  
+        // Kontrak mulai Okt 2024, bayar sampai Mar 2025, current Juni 2025 = telat 2 bulan
+        int[] cicilanBudi = {1100000, 1100000, 1100000, 1100000, 1100000, 1100000}; // Okt-Mar
+        LocalDate[] tanggalBudi = {
+            LocalDate.of(2024, 10, 15), LocalDate.of(2024, 11, 15),
+            LocalDate.of(2024, 12, 15), LocalDate.of(2025, 1, 15),
+            LocalDate.of(2025, 2, 15), LocalDate.of(2025, 3, 15)
+        };
+        
+        for (int i = 0; i < cicilanBudi.length; i++) {
+            stmt.setInt(1, 2); // id_kontrak Budi
+            stmt.setInt(2, cicilanBudi[i]);
+            stmt.setDate(3, Date.valueOf(tanggalBudi[i]));
+            stmt.setInt(4, 1); // id_staff
             stmt.executeUpdate();
+        }
 
-            stmt.setInt(1, idKontrakSiti);
-            stmt.setInt(2, jumlahCicilanSiti);
-            stmt.setDate(3, Date.valueOf(LocalDate.of(2025, 1, 15)));
-            stmt.setInt(4, idStaffSiti);
+        // Kontrak 3 (Siti) - Tunggakan 3 bulan
+        // Kontrak mulai Sep 2024, bayar sampai Feb 2025, current Juni 2025 = telat 3 bulan
+        int[] cicilanSiti = {1100000, 1100000, 1100000, 1100000, 1100000, 1100000}; // Sep-Feb
+        LocalDate[] tanggalSiti = {
+            LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 1),
+            LocalDate.of(2024, 11, 1), LocalDate.of(2024, 12, 1),
+            LocalDate.of(2025, 1, 1), LocalDate.of(2025, 2, 1)
+        };
+        
+        for (int i = 0; i < cicilanSiti.length; i++) {
+            stmt.setInt(1, 3); // id_kontrak Siti
+            stmt.setInt(2, cicilanSiti[i]);
+            stmt.setDate(3, Date.valueOf(tanggalSiti[i]));
+            stmt.setInt(4, 2); // id_staff
             stmt.executeUpdate();
+        }
 
-            int idKontrakAgus = 3;
-            int jumlahCicilanAgus = 1100000;
-            int durasiAgus = 6;
-            int idStaffAgus = 3;
-            LocalDate mulaiAgus = LocalDate.of(2025, 1, 10);
+        // Kontrak 4 (Dedi) - Tunggakan > 3 bulan
+        // Kontrak mulai Jul 2024, bayar sampai Jan 2025, current Juni 2025 = telat 4 bulan
+        int[] cicilanDedi = {1100000, 1100000, 1100000, 1100000, 1100000}; // Jul-Nov
+        LocalDate[] tanggalDedi = {
+            LocalDate.of(2024, 7, 10), LocalDate.of(2024, 8, 10),
+            LocalDate.of(2024, 9, 10), LocalDate.of(2024, 10, 10),
+            LocalDate.of(2024, 11, 10)
+        };
+        
+        for (int i = 0; i < cicilanDedi.length; i++) {
+            stmt.setInt(1, 4); // id_kontrak Dedi
+            stmt.setInt(2, cicilanDedi[i]);
+            stmt.setDate(3, Date.valueOf(tanggalDedi[i]));
+            stmt.setInt(4, 2); // id_staff
+            stmt.executeUpdate();
+        }
 
-            for (int i = 0; i < durasiAgus; i++) {
-                stmt.setInt(1, idKontrakAgus);
-                stmt.setInt(2, jumlahCicilanAgus);
-                stmt.setDate(3, Date.valueOf(mulaiAgus.plusMonths(i)));
-                stmt.setInt(4, idStaffAgus);
-                stmt.executeUpdate();
+        // Kontrak 5 (Eka) - Sudah lunas (semua cicilan dibayar)
+        int[] cicilanEka = {1100000, 1100000, 1100000, 1100000, 1100000, 1100000}; // 6 cicilan penuh
+        LocalDate[] tanggalEka = {
+            LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1),
+            LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1),
+            LocalDate.of(2024, 10, 1), LocalDate.of(2024, 11, 1)
+        };
+        
+        for (int i = 0; i < cicilanEka.length; i++) {
+            stmt.setInt(1, 5); // id_kontrak Eka
+            stmt.setInt(2, cicilanEka[i]);
+            stmt.setDate(3, Date.valueOf(tanggalEka[i]));
+            stmt.setInt(4, 3); // id_staff
+            stmt.executeUpdate();
+        }
+
+        // Kontrak 6 (Farah) - Aktif tanpa tunggakan
+        int[] cicilanFarah = {1100000, 1100000}; // Apr-Mei 2025 (current Juni, jadi tidak telat)
+        LocalDate[] tanggalFarah = {
+            LocalDate.of(2025, 4, 1), LocalDate.of(2025, 5, 1)
+        };
+        
+        for (int i = 0; i < cicilanFarah.length; i++) {
+            stmt.setInt(1, 6); // id_kontrak Farah
+            stmt.setInt(2, cicilanFarah[i]);
+            stmt.setDate(3, Date.valueOf(tanggalFarah[i]));
+            stmt.setInt(4, 3); // id_staff
+            stmt.executeUpdate();
             }
         }
     }
-
 
     private void printSeededData() throws SQLException {
         Connection conn = dbConnection.getConnection();
@@ -273,3 +323,4 @@ public class DatabaseSeeder {
         };
     }
 }
+
