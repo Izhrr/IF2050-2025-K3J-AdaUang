@@ -20,9 +20,10 @@ public class InstalmentService {
 
         try {
             // 1. Validasi kontrak
-            String queryKontrak = "SELECT jumlah_bayar, jumlah_bayar_bunga FROM kontrak WHERE id_kontrak = ?";
+            String queryKontrak = "SELECT jumlah_bayar, jumlah_bayar_bunga, total FROM kontrak WHERE id_kontrak = ?";
             int jumlahBayarSebelumnya = 0;
             int jumlahBayarTotal = 0;
+            int totalPinjaman = 0;
 
             try (PreparedStatement stmt = conn.prepareStatement(queryKontrak)) {
                 stmt.setInt(1, idKontrak);
@@ -30,25 +31,30 @@ public class InstalmentService {
                 if (rs.next()) {
                     jumlahBayarSebelumnya = rs.getInt("jumlah_bayar");
                     jumlahBayarTotal = rs.getInt("jumlah_bayar_bunga");
+                    totalPinjaman = rs.getInt("total");
                 } else {
                     System.err.println("Tidak ditemukan kontrak dengan ID: " + idKontrak);
                     return false;
                 }
             }
 
-            // 2. Update jumlah_bayar di kontrak
+            // 2. Update jumlah_bayar di kontrak (MENAMBAHKAN jumlah cicilan)
             int jumlahBaru = jumlahBayarSebelumnya + jumlah;
+            
+            // Cek status: jika jumlah bayar >= total pinjaman maka lunas (1), jika belum maka aktif (0)
+            boolean statusLunas = jumlahBaru >= totalPinjaman;
+            int statusValue = statusLunas ? 1 : 0;
+            
             String updateKontrak = "UPDATE kontrak SET jumlah_bayar = ?, status = ? WHERE id_kontrak = ?";
             try (PreparedStatement stmt = conn.prepareStatement(updateKontrak)) {
-                boolean lunas = jumlahBaru >= jumlahBayarTotal;
                 stmt.setInt(1, jumlahBaru);
-                stmt.setBoolean(2, !lunas ? true : false); // jika lunas, maka status menjadi false (tidak aktif)
+                stmt.setInt(2, statusValue); // 1 = lunas, 0 = belum lunas
                 stmt.setInt(3, idKontrak);
                 stmt.executeUpdate();
             }
 
             // 3. Insert ke tabel cicilan
-            String insertCicilan = "INSERT INTO cicilan (id_kontrak, jumlah_cicilan, tanggal_cicilan, id_staff) VALUES (?, ?, ?, ?)";
+            String insertCicilan = "INSERT INTO cicilan (id_kontrak, jumlah_terbayarkan, tanggal_cicilan, id_staff) VALUES (?, ?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(insertCicilan)) {
                 stmt.setInt(1, idKontrak);
                 stmt.setInt(2, jumlah);
@@ -57,6 +63,12 @@ public class InstalmentService {
                 stmt.executeUpdate();
             }
 
+            if (statusLunas) {
+                System.out.println("Selamat! Kontrak telah LUNAS. Total terbayar: " + jumlahBaru + " dari total pinjaman: " + totalPinjaman);
+            } else {
+                System.out.println("Cicilan berhasil ditambahkan. Jumlah bayar sekarang: " + jumlahBaru + " dari total pinjaman: " + totalPinjaman);
+            }
+            
             return true;
 
         } catch (SQLException e) {
