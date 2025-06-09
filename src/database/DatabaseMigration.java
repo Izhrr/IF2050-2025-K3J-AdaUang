@@ -134,6 +134,7 @@ public class DatabaseMigration {
                 CREATE TABLE IF NOT EXISTS cicilan (
                     id_cicilan INT PRIMARY KEY AUTO_INCREMENT,
                     id_kontrak INT NOT NULL,
+                    tenor INT NOT NULL,
                     jumlah_cicilan INT NOT NULL,
                     tanggal_cicilan DATE NOT NULL,
                     id_staff INT NOT NULL,

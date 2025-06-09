@@ -4,17 +4,19 @@ import controllers.AuthController;
 import controllers.InstalmentController;
 import java.awt.*;
 import java.time.LocalDate;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import models.Cicilan;
 import models.User;
 
 public class InstalmentView extends JPanel {
     private final InstalmentController controller;
     private final AuthController authController;
-
     private JTextField inputIdKontrak, inputJumlah, inputTenor, inputTanggal;
     private JTable cicilanTable;
+    private DefaultTableModel tableModel; // Jadikan instance variable
 
     public InstalmentView(AuthController authController) {
         this.authController = authController;
@@ -69,7 +71,7 @@ public class InstalmentView extends JPanel {
         inputTenor.setBounds(210, 90, inputWidth, rowHeight); 
         formPanel.add(inputTenor);
 
-        JLabel tanggalLabel = new JLabel("Tanggal (yyyy-mm-dd)");
+        JLabel tanggalLabel = new JLabel("Tanggal (Year-Month-Day)");
         tanggalLabel.setBounds(20, 130, labelWidth, rowHeight);
         formPanel.add(tanggalLabel);
 
@@ -78,7 +80,7 @@ public class InstalmentView extends JPanel {
         formPanel.add(inputTanggal);
 
         JButton buttonBayar = new JButton("Bayar");
-        buttonBayar.setBounds(520, 50, 80, 30);
+        buttonBayar.setBounds(530, 75, 80, 30);
         buttonBayar.setBackground(new Color(40, 167, 69));
         buttonBayar.setForeground(Color.WHITE);
         buttonBayar.setFont(new Font("Montserrat", Font.BOLD, 12));
@@ -88,7 +90,7 @@ public class InstalmentView extends JPanel {
         formPanel.add(buttonBayar);
 
         JButton buttonCancel = new JButton("Batal");
-        buttonCancel.setBounds(610, 50, 80, 30); 
+        buttonCancel.setBounds(620, 75, 80, 30); 
         buttonCancel.setBackground(new Color(220, 53, 69));
         buttonCancel.setForeground(Color.WHITE);
         buttonCancel.setFont(new Font("Montserrat", Font.BOLD, 12));
@@ -97,17 +99,31 @@ public class InstalmentView extends JPanel {
         buttonCancel.setBorderPainted(false);
         formPanel.add(buttonCancel);
 
-        String[] columnNames = {"ID Kontrak", "Jumlah", "Tenor", "Tanggal"};
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
-        cicilanTable = new JTable(model);
+        JLabel detailLabel = new JLabel("Detail Pembayaran Cicilan");
+        detailLabel.setFont(new Font("Montserrat", Font.BOLD, 16));
+        detailLabel.setForeground(new Color(30, 30, 30));
+        detailLabel.setBounds(32, 290, 300, 25);
+        add(detailLabel);
+
+        String[] columnNames = {"ID Kontrak", "Jumlah Cicilan", "Tenor ke-", "Tanggal Cicilan"};
+        tableModel = new DefaultTableModel(columnNames, 0); // Gunakan instance variable
+        cicilanTable = new JTable(tableModel);
+        cicilanTable.setRowHeight(28);
+        cicilanTable.setFont(new Font("Montserrat", Font.PLAIN, 14));
+        cicilanTable.getTableHeader().setFont(new Font("Montserrat", Font.BOLD, 14));
+        cicilanTable.getTableHeader().setBackground(new Color(245, 245, 245));
+        cicilanTable.getTableHeader().setForeground(new Color(70, 70, 70));
 
         JScrollPane tableScroll = new JScrollPane(cicilanTable);
-        tableScroll.setBounds(32, 300, 780, 280); 
-        tableScroll.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        tableScroll.setBounds(32, 320, 780, 200); // Perbesar height untuk tampil lebih banyak data
+        tableScroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
         add(tableScroll);
 
-        buttonBayar.addActionListener(e -> handleBayar(model));
-        buttonCancel.addActionListener(e -> clearForm(model));
+        buttonBayar.addActionListener(e -> handleBayar());
+        buttonCancel.addActionListener(e -> clearForm());
+
+        // Load data cicilan saat panel dibuka
+        loadCicilanData();
 
         SwingUtilities.invokeLater(() -> {
             revalidate();
@@ -115,11 +131,35 @@ public class InstalmentView extends JPanel {
         });
     }
 
-    private void handleBayar(DefaultTableModel model) {
+    private void loadCicilanData() {
+        try {
+            tableModel.setRowCount(0); // Clear existing data
+            
+            // Panggil method dari controller untuk get all cicilan
+            List<Cicilan> cicilanList = controller.getAllCicilan();
+            
+            for (Cicilan cicilan : cicilanList) {
+                tableModel.addRow(new Object[]{
+                    cicilan.getIdKontrak(),
+                    cicilan.getJumlahCicilan(),
+                    "Tenor ke-" + cicilan.getTenor(),
+                    cicilan.getTanggalCicilan()
+                });
+            }
+            
+            System.out.println("Loaded " + cicilanList.size() + " cicilan records");
+            
+        } catch (Exception e) {
+            System.err.println("Error loading cicilan data: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void handleBayar() {
         try {
             int idKontrak = Integer.parseInt(inputIdKontrak.getText().trim());
             int jumlah = Integer.parseInt(inputJumlah.getText().trim());
-            String tenor = inputTenor.getText().trim();
+            int tenor = Integer.parseInt(inputTenor.getText().trim());
             LocalDate tanggal = LocalDate.parse(inputTanggal.getText().trim());
 
             User currentUser = authController.getCurrentUser();
@@ -129,24 +169,38 @@ public class InstalmentView extends JPanel {
             }
 
             int idStaff = currentUser.getId_user();
-            boolean success = controller.tambahCicilan(idKontrak, jumlah, tanggal, idStaff);
+            boolean success = controller.tambahCicilan(idKontrak, jumlah, tenor, tanggal, idStaff);
+            
             if (success) {
-                model.setRowCount(0);
-                model.addRow(new Object[]{idKontrak, jumlah, tenor + " Bulan", tanggal});
+                // Tambahkan data baru di baris paling atas (index 0)
+                tableModel.insertRow(0, new Object[]{
+                    idKontrak, 
+                    jumlah, 
+                    "Tenor ke-" + tenor, 
+                    tanggal
+                });
+                
                 JOptionPane.showMessageDialog(this, "Cicilan berhasil disimpan.");
+                clearForm();
             } else {
-                JOptionPane.showMessageDialog(this, "Gagal menyimpan cicilan. Periksa ID kontrak.");
+                JOptionPane.showMessageDialog(this, "Gagal menyimpan cicilan. Periksa jumlah cicilan, tenor atau ID kontrak.");
             }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "ID Kontrak, Jumlah Cicilan, dan Tenor harus berupa angka.");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Input tidak valid. Pastikan semua field terisi dengan benar.");
         }
     }
 
-    private void clearForm(DefaultTableModel model) {
+    private void clearForm() {
         inputIdKontrak.setText("");
         inputJumlah.setText("");
         inputTenor.setText("");
         inputTanggal.setText("");
-        model.setRowCount(0);
+    }
+
+    // Method untuk refresh data cicilan (bisa dipanggil dari luar)
+    public void refreshData() {
+        loadCicilanData();
     }
 }

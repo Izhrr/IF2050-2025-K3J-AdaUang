@@ -125,7 +125,7 @@ public class DatabaseSeeder {
     }
 
     private void insertTestInstalment() throws SQLException {
-        String sql = "INSERT INTO cicilan (id_kontrak, jumlah_cicilan, tanggal_cicilan, id_staff) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO cicilan (id_kontrak, tenor, jumlah_cicilan, tanggal_cicilan, id_staff) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = dbConnection.getConnection().prepareStatement(sql)) {
 
         // Kontrak 1 (Andi) - Tunggakan 1 bulan
@@ -139,9 +139,10 @@ public class DatabaseSeeder {
         
         for (int i = 0; i < cicilanAndi.length; i++) {
             stmt.setInt(1, 1); // id_kontrak Andi
-            stmt.setInt(2, cicilanAndi[i]);
-            stmt.setDate(3, Date.valueOf(tanggalAndi[i]));
-            stmt.setInt(4, 1); // id_staff
+            stmt.setInt(2, 12);
+            stmt.setInt(3, cicilanAndi[i]);
+            stmt.setDate(4, Date.valueOf(tanggalAndi[i]));
+            stmt.setInt(5, 1); // id_staff
             stmt.executeUpdate();
         }
 
@@ -156,9 +157,10 @@ public class DatabaseSeeder {
         
         for (int i = 0; i < cicilanBudi.length; i++) {
             stmt.setInt(1, 2); // id_kontrak Budi
-            stmt.setInt(2, cicilanBudi[i]);
-            stmt.setDate(3, Date.valueOf(tanggalBudi[i]));
-            stmt.setInt(4, 1); // id_staff
+            stmt.setInt(2, 24);
+            stmt.setInt(3, cicilanBudi[i]);
+            stmt.setDate(4, Date.valueOf(tanggalBudi[i]));
+            stmt.setInt(5, 1); // id_staff
             stmt.executeUpdate();
         }
 
@@ -173,9 +175,10 @@ public class DatabaseSeeder {
         
         for (int i = 0; i < cicilanSiti.length; i++) {
             stmt.setInt(1, 3); // id_kontrak Siti
-            stmt.setInt(2, cicilanSiti[i]);
-            stmt.setDate(3, Date.valueOf(tanggalSiti[i]));
-            stmt.setInt(4, 2); // id_staff
+            stmt.setInt(2, 18);
+            stmt.setInt(3, cicilanSiti[i]);
+            stmt.setDate(4, Date.valueOf(tanggalSiti[i]));
+            stmt.setInt(5, 2); // id_staff
             stmt.executeUpdate();
         }
 
@@ -190,9 +193,10 @@ public class DatabaseSeeder {
         
         for (int i = 0; i < cicilanDedi.length; i++) {
             stmt.setInt(1, 4); // id_kontrak Dedi
-            stmt.setInt(2, cicilanDedi[i]);
-            stmt.setDate(3, Date.valueOf(tanggalDedi[i]));
-            stmt.setInt(4, 2); // id_staff
+            stmt.setInt(2, 15);
+            stmt.setInt(3, cicilanDedi[i]);
+            stmt.setDate(4, Date.valueOf(tanggalDedi[i]));
+            stmt.setInt(5, 2); // id_staff
             stmt.executeUpdate();
         }
 
@@ -206,9 +210,10 @@ public class DatabaseSeeder {
         
         for (int i = 0; i < cicilanEka.length; i++) {
             stmt.setInt(1, 5); // id_kontrak Eka
-            stmt.setInt(2, cicilanEka[i]);
-            stmt.setDate(3, Date.valueOf(tanggalEka[i]));
-            stmt.setInt(4, 3); // id_staff
+            stmt.setInt(2, 6);
+            stmt.setInt(4, cicilanEka[i]);
+            stmt.setDate(4, Date.valueOf(tanggalEka[i]));
+            stmt.setInt(5, 3); // id_staff
             stmt.executeUpdate();
         }
 
@@ -220,9 +225,10 @@ public class DatabaseSeeder {
         
         for (int i = 0; i < cicilanFarah.length; i++) {
             stmt.setInt(1, 6); // id_kontrak Farah
-            stmt.setInt(2, cicilanFarah[i]);
-            stmt.setDate(3, Date.valueOf(tanggalFarah[i]));
-            stmt.setInt(4, 3); // id_staff
+            stmt.setInt(2, 9);
+            stmt.setInt(3, cicilanFarah[i]);
+            stmt.setDate(4, Date.valueOf(tanggalFarah[i]));
+            stmt.setInt(5, 3); // id_staff
             stmt.executeUpdate();
             }
         }
