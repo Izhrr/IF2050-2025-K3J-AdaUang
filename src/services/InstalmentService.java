@@ -19,11 +19,12 @@ public class InstalmentService {
 
         try {
             // 1. Validasi kontrak dan ambil data
-            String queryKontrak = "SELECT jumlah_bayar, jumlah_bayar_bunga, total, cicilan_per_bulan FROM kontrak WHERE id_kontrak = ?";
+            String queryKontrak = "SELECT jumlah_bayar, jumlah_bayar_bunga, total, cicilan_per_bulan, tenor FROM kontrak WHERE id_kontrak = ?";
             int jumlahBayarSebelumnya = 0;
             int jumlahBayarTotal = 0;
             int totalPinjaman = 0;
             int cicilanPerBulan = 0;
+            int tenorMaksimal = 0; // Tambahan untuk tenor maksimal
 
             try (PreparedStatement stmt = conn.prepareStatement(queryKontrak)) {
                 stmt.setInt(1, idKontrak);
@@ -33,13 +34,22 @@ public class InstalmentService {
                     jumlahBayarTotal = rs.getInt("jumlah_bayar_bunga");
                     totalPinjaman = rs.getInt("total");
                     cicilanPerBulan = rs.getInt("cicilan_per_bulan");
+                    tenorMaksimal = rs.getInt("tenor"); // Ambil tenor maksimal dari kontrak
                 } else {
                     System.err.println("Tidak ditemukan kontrak dengan ID: " + idKontrak);
                     return false;
                 }
             }
 
-            // 2. Validasi apakah tenor sudah pernah dibayar
+            // 2. Validasi tenor tidak melebihi tenor maksimal kontrak
+            if (tenor > tenorMaksimal) {
+                System.err.println("INVALID: Tenor melebihi batas maksimal!");
+                System.err.println("Tenor maksimal untuk kontrak ini: " + tenorMaksimal);
+                System.err.println("Tenor yang dimasukkan: " + tenor);
+                return false;
+            }
+
+            // 3. Validasi apakah tenor sudah pernah dibayar
             String queryTenor = "SELECT COUNT(*) FROM cicilan WHERE id_kontrak = ? AND tenor = ?";
             try (PreparedStatement stmt = conn.prepareStatement(queryTenor)) {
                 stmt.setInt(1, idKontrak);
@@ -51,7 +61,7 @@ public class InstalmentService {
                 }
             }
 
-            // 3. Validasi urutan tenor (harus tenor terakhir + 1)
+            // 4. Validasi urutan tenor (harus tenor terakhir + 1)
             String queryTenorTerakhir = "SELECT COALESCE(MAX(tenor), 0) FROM cicilan WHERE id_kontrak = ?";
             int tenorTerakhir = 0;
             try (PreparedStatement stmt = conn.prepareStatement(queryTenorTerakhir)) {
@@ -71,7 +81,14 @@ public class InstalmentService {
                 return false;
             }
 
-            // 4. Validasi jumlah cicilan
+            // 5. Validasi apakah kontrak sudah lunas (semua tenor telah dibayar)
+            if (tenorTerakhir >= tenorMaksimal) {
+                System.err.println("INVALID: Kontrak sudah lunas!");
+                System.err.println("Semua tenor (1-" + tenorMaksimal + ") sudah dibayar.");
+                return false;
+            }
+
+            // 6. Validasi jumlah cicilan
             if (jumlah != cicilanPerBulan) {
                 System.err.println("INVALID: Jumlah cicilan tidak sesuai!");
                 System.err.println("Jumlah yang dimasukkan: " + jumlah);
@@ -79,7 +96,7 @@ public class InstalmentService {
                 return false;
             }
 
-            // 5. Update jumlah_bayar di kontrak (MENAMBAHKAN jumlah cicilan)
+            // 7. Update jumlah_bayar di kontrak (MENAMBAHKAN jumlah cicilan)
             int jumlahBaru = jumlahBayarSebelumnya + jumlah;
             
             // Cek status: jika jumlah bayar >= total pinjaman maka lunas (1), jika belum maka aktif (0)
@@ -94,7 +111,7 @@ public class InstalmentService {
                 stmt.executeUpdate();
             }
 
-            // 6. Insert ke tabel cicilan
+            // 8. Insert ke tabel cicilan
             String insertCicilan = "INSERT INTO cicilan (id_kontrak, tenor, jumlah_cicilan, tanggal_cicilan, id_staff) VALUES (?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(insertCicilan)) {
                 stmt.setInt(1, idKontrak);
