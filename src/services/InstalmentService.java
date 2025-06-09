@@ -54,7 +54,7 @@ public class InstalmentService {
             }
 
             // 3. Insert ke tabel cicilan
-            String insertCicilan = "INSERT INTO cicilan (id_kontrak, jumlah_terbayarkan, tanggal_cicilan, id_staff) VALUES (?, ?, ?, ?)";
+            String insertCicilan = "INSERT INTO cicilan (id_kontrak, jumlah_cicilan, tanggal_cicilan, id_staff) VALUES (?, ?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(insertCicilan)) {
                 stmt.setInt(1, idKontrak);
                 stmt.setInt(2, jumlah);
