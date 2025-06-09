@@ -69,7 +69,7 @@ public class InstalmentView extends JPanel {
         inputTenor.setBounds(210, 90, inputWidth, rowHeight); 
         formPanel.add(inputTenor);
 
-        JLabel tanggalLabel = new JLabel("Tanggal (yyyy-mm-dd)");
+        JLabel tanggalLabel = new JLabel("Tanggal (Year-Month-Day)");
         tanggalLabel.setBounds(20, 130, labelWidth, rowHeight);
         formPanel.add(tanggalLabel);
 
@@ -78,7 +78,7 @@ public class InstalmentView extends JPanel {
         formPanel.add(inputTanggal);
 
         JButton buttonBayar = new JButton("Bayar");
-        buttonBayar.setBounds(520, 50, 80, 30);
+        buttonBayar.setBounds(530, 75, 80, 30);
         buttonBayar.setBackground(new Color(40, 167, 69));
         buttonBayar.setForeground(Color.WHITE);
         buttonBayar.setFont(new Font("Montserrat", Font.BOLD, 12));
@@ -88,7 +88,7 @@ public class InstalmentView extends JPanel {
         formPanel.add(buttonBayar);
 
         JButton buttonCancel = new JButton("Batal");
-        buttonCancel.setBounds(610, 50, 80, 30); 
+        buttonCancel.setBounds(620, 75, 80, 30); 
         buttonCancel.setBackground(new Color(220, 53, 69));
         buttonCancel.setForeground(Color.WHITE);
         buttonCancel.setFont(new Font("Montserrat", Font.BOLD, 12));
@@ -97,13 +97,25 @@ public class InstalmentView extends JPanel {
         buttonCancel.setBorderPainted(false);
         formPanel.add(buttonCancel);
 
-        String[] columnNames = {"ID Kontrak", "Jumlah", "Tenor", "Tanggal"};
+        JLabel detailLabel = new JLabel("Detail Pembayaran Cicilan");
+        detailLabel.setFont(new Font("Montserrat", Font.BOLD, 16));
+        detailLabel.setForeground(new Color(30, 30, 30));
+        detailLabel.setBounds(32, 290, 300, 25);
+        add(detailLabel);
+
+        String[] columnNames = {"ID Kontrak", "Jumlah Cicilan", "Tenor", "Tanggal Cicilan"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
         cicilanTable = new JTable(model);
+        cicilanTable.setRowHeight(28);
+        cicilanTable.setFont(new Font("Montserrat", Font.PLAIN, 14));
+        cicilanTable.getTableHeader().setFont(new Font("Montserrat", Font.BOLD, 14));
+        cicilanTable.getTableHeader().setBackground(new Color(245, 245, 245));
+        cicilanTable.getTableHeader().setForeground(new Color(70, 70, 70));
 
+        // Scroll pane tabel
         JScrollPane tableScroll = new JScrollPane(cicilanTable);
-        tableScroll.setBounds(32, 300, 780, 280); 
-        tableScroll.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        tableScroll.setBounds(32, 320, 780, 100); // Lebar & posisi
+        tableScroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
         add(tableScroll);
 
         buttonBayar.addActionListener(e -> handleBayar(model));
