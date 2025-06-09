@@ -35,14 +35,14 @@ public class AgingReport extends BaseModel {
                     k.id_kontrak,
                     GREATEST(0, 
                         TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, CURDATE()) - 
-                        COALESCE((SELECT COUNT(*) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
+                        COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
                     ) as overdue_months,
                     k.cicilan_per_bulan * GREATEST(0, 
                         TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, CURDATE()) - 
-                        COALESCE((SELECT COUNT(*) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
+                        COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
                     ) as outstanding_amount
                 FROM kontrak k
-                WHERE k.status = 1
+                WHERE k.status = true
             ) overdue_calc ON k.id_kontrak = overdue_calc.id_kontrak
             WHERE overdue_calc.overdue_months > 0
             GROUP BY u.branch
@@ -87,14 +87,14 @@ public class AgingReport extends BaseModel {
                     k.id_kontrak,
                     GREATEST(0, 
                         TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) - 
-                        COALESCE((SELECT COUNT(*) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
+                        COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
                     ) as overdue_months,
                     k.cicilan_per_bulan * GREATEST(0, 
                         TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) - 
-                        COALESCE((SELECT COUNT(*) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
+                        COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
                     ) as outstanding_amount
                 FROM kontrak k
-                WHERE k.status = 1
+                WHERE k.status = true
             ) overdue_calc ON k.id_kontrak = overdue_calc.id_kontrak
             WHERE overdue_calc.overdue_months > 0
             GROUP BY u.branch
@@ -103,7 +103,7 @@ public class AgingReport extends BaseModel {
         try (Connection conn = dbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            // Set parameter tanggal (year-month-01)
+            // Set parameter tanggal
             String dateStr = String.format("%d-%02d-01", year, month);
             stmt.setString(1, dateStr);
             stmt.setString(2, dateStr);
@@ -130,37 +130,42 @@ public class AgingReport extends BaseModel {
         String debugSql = """
             SELECT 
                 k.id_kontrak, k.nama_user, u.branch,
-                k.tanggal_pinjam,
+                k.tanggal_pinjam, k.status, k.tenor as total_tenor,
                 TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, CURDATE()) as months_passed,
-                COALESCE((SELECT COUNT(*) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0) as payments_made,
+                COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0) as last_tenor_paid,
+                COALESCE((SELECT MAX(c.tanggal_cicilan) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 'Belum Ada') as last_payment_date,
                 GREATEST(0, 
                     TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, CURDATE()) - 
-                    COALESCE((SELECT COUNT(*) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
+                    COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
                 ) as overdue_months,
-                k.status
+                k.cicilan_per_bulan
             FROM kontrak k
             JOIN users u ON k.id_user = u.id_user
-            WHERE k.status = 1
+            WHERE k.status = true
             ORDER BY k.id_kontrak
             """;
-    
+
         try (Connection conn = dbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(debugSql)) {
-        
+    
             try (ResultSet rs = stmt.executeQuery()) {
-                System.out.println("\n=== DEBUG AGING REPORT DATA (Current: Juni 2025) ===");
-                System.out.println("ID | Nama           | Branch   | Start Date | Months Passed | Payments | Overdue | Status");
-                System.out.println("----------------------------------------------------------------------------------------");
+                System.out.println("\n=== DEBUG AGING REPORT DATA (Current: " + java.time.LocalDate.now() + ") ===");
+                System.out.println("ID | Nama           | Branch   | Start Date | Months | Last Tenor | Last Payment | Overdue | Outstanding");
+                System.out.println("------------------------------------------------------------------------------------------------------------");
                 while (rs.next()) {
-                    System.out.printf("%-2d | %-15s | %-8s | %-10s | %-13d | %-8d | %-7d | %s%n",
+                    int overdue = rs.getInt("overdue_months");
+                    long outstanding = rs.getLong("cicilan_per_bulan") * overdue;
+                    
+                    System.out.printf("%-2d | %-15s | %-8s | %-10s | %-6d | %-10d | %-12s | %-7d | Rp %,d%n",
                         rs.getInt("id_kontrak"),
                         rs.getString("nama_user"),
                         rs.getString("branch"),
                         rs.getDate("tanggal_pinjam"),
                         rs.getInt("months_passed"),
-                        rs.getInt("payments_made"),
-                        rs.getInt("overdue_months"),
-                        rs.getBoolean("status") ? "AKTIF" : "LUNAS"
+                        rs.getInt("last_tenor_paid"),
+                        rs.getString("last_payment_date"),
+                        overdue,
+                        outstanding
                     );
                 }
             }
