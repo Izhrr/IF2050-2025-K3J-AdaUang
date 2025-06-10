@@ -35,14 +35,14 @@ public class Contract extends BaseModel {
             if (isNewRecord()) {
                 return insert();
             } else {
-                // logika update
-                return false;
+                return update(); // <--- PENTING!
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
+
     
     private boolean insert() throws SQLException {
         // Perbaiki: Hitung jumlah_bayar_bunga dari total, bukan jumlah_bayar
@@ -144,15 +144,16 @@ public class Contract extends BaseModel {
     }
 
     private boolean update() throws SQLException {
-    String sql = "UPDATE kontrak SET jumlah_bayar=?, status=? WHERE id_kontrak=?";
-    try (Connection conn = getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setInt(1, this.jumlah_bayar);
-        stmt.setBoolean(2, this.status);
-        stmt.setInt(3, this.id_kontrak);
-        return stmt.executeUpdate() > 0;
+        String sql = "UPDATE kontrak SET total=?, jumlah_bayar=?, status=? WHERE id_kontrak=?";
+        try (Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, this.total);
+            stmt.setInt(2, this.jumlah_bayar);
+            stmt.setBoolean(3, this.status);
+            stmt.setInt(4, this.id_kontrak);
+            return stmt.executeUpdate() > 0;
+        }
     }
-}
 
     // Getters and Setters
     public String getFormattedTotal() {
@@ -188,4 +189,6 @@ public class Contract extends BaseModel {
     public void setUsername(String username) { this.username = username; }
     public String getBranch() { return branch; }
     public void setBranch(String branch) { this.branch = branch; }
+    public int getId() { return id_kontrak; }
+    public void setId(int id) { this.id_kontrak = id; }
 }
