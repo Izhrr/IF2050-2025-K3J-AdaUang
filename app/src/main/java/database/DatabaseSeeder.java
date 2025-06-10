@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class DatabaseSeeder {
     private DatabaseConfig config;
     private DatabaseConnection dbConnection;

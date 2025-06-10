@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import models.User;
+import models.*;
 
 public class SidebarView extends JPanel {
 
@@ -63,6 +63,7 @@ public class SidebarView extends JPanel {
                 case User.ROLE_MANAGER:
                     topPanel.add(menuButton(createIcon("/contract_icon.png", 24, 24), "Manajemen Kontrak", "kontrak"));
                     topPanel.add(menuButton(createIcon("/contract_icon.png", 24, 24), "Manajemen Cicilan", "cicilan"));
+                    topPanel.add(menuButton(createIcon("/contract_icon.png", 24, 24), "Laporan Umur Piutang", "aging-report"));
                     break;
             }
         }
