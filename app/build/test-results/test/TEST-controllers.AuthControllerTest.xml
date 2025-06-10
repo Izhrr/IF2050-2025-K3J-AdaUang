@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< Updated upstream
 <testsuite name="controllers.AuthControllerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:41:59.978Z" hostname="MSI" time="0.095">
   <properties/>
   <testcase name="testLoginSuccess()" classname="controllers.AuthControllerTest" time="0.01"/>
@@ -7,6 +8,17 @@
   <testcase name="testLogout()" classname="controllers.AuthControllerTest" time="0.019"/>
   <testcase name="testRegisterSuccess()" classname="controllers.AuthControllerTest" time="0.038"/>
   <system-out><![CDATA[ Starting database seeding...
+=======
+<testsuite name="controllers.AuthControllerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:33:28.617Z" hostname="MSI" time="0.103">
+  <properties/>
+  <testcase name="testLoginSuccess()" classname="controllers.AuthControllerTest" time="0.02"/>
+  <testcase name="testLoginFailure()" classname="controllers.AuthControllerTest" time="0.023"/>
+  <testcase name="testRegisterPasswordMismatch()" classname="controllers.AuthControllerTest" time="0.001"/>
+  <testcase name="testLogout()" classname="controllers.AuthControllerTest" time="0.022"/>
+  <testcase name="testRegisterSuccess()" classname="controllers.AuthControllerTest" time="0.035"/>
+  <system-out><![CDATA[Config file not found, using default values
+ Starting database seeding...
+>>>>>>> Stashed changes
  Database connection established
  Database seeding completed successfully!
 

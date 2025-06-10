@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< Updated upstream
 <testsuite name="services.InstalmentServiceTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:42:01.393Z" hostname="MSI" time="0.021">
+=======
+<testsuite name="services.InstalmentServiceTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:33:29.826Z" hostname="MSI" time="0.024">
+>>>>>>> Stashed changes
   <properties/>
   <testcase name="testGetAllCicilan()" classname="services.InstalmentServiceTest" time="0.003"/>
   <testcase name="testAddCicilanSuccess()" classname="services.InstalmentServiceTest" time="0.011"/>
   <testcase name="testAddCicilanFailWrongTenor()" classname="services.InstalmentServiceTest" time="0.002"/>
+<<<<<<< Updated upstream
   <testcase name="testAddCicilanFailWrongAmount()" classname="services.InstalmentServiceTest" time="0.004"/>
+=======
+  <testcase name="testAddCicilanFailWrongAmount()" classname="services.InstalmentServiceTest" time="0.006"/>
+>>>>>>> Stashed changes
   <system-out><![CDATA[ Starting database seeding...
  Database connection established
  Database seeding completed successfully!

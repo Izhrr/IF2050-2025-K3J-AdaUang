@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< Updated upstream
 <testsuite name="services.AuthServiceTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:42:01.081Z" hostname="MSI" time="0.08">
+=======
+<testsuite name="services.AuthServiceTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:33:29.499Z" hostname="MSI" time="0.098">
+>>>>>>> Stashed changes
   <properties/>
   <testcase name="testLoginSuccess()" classname="services.AuthServiceTest" time="0.002"/>
   <testcase name="testRegisterFailPasswordMismatch()" classname="services.AuthServiceTest" time="0.0"/>
@@ -7,9 +11,15 @@
   <testcase name="testLoginFailUserNotFound()" classname="services.AuthServiceTest" time="0.012"/>
   <testcase name="testRegisterNullInput()" classname="services.AuthServiceTest" time="0.0"/>
   <testcase name="testLoginNullInput()" classname="services.AuthServiceTest" time="0.0"/>
+<<<<<<< Updated upstream
   <testcase name="testRegisterFailInvalidRole()" classname="services.AuthServiceTest" time="0.02"/>
   <testcase name="testRegisterFailUsernameExists()" classname="services.AuthServiceTest" time="0.011"/>
   <testcase name="testRegisterSuccess()" classname="services.AuthServiceTest" time="0.021"/>
+=======
+  <testcase name="testRegisterFailInvalidRole()" classname="services.AuthServiceTest" time="0.03"/>
+  <testcase name="testRegisterFailUsernameExists()" classname="services.AuthServiceTest" time="0.012"/>
+  <testcase name="testRegisterSuccess()" classname="services.AuthServiceTest" time="0.028"/>
+>>>>>>> Stashed changes
   <system-out><![CDATA[ Starting database seeding...
  Database connection established
  Database seeding completed successfully!

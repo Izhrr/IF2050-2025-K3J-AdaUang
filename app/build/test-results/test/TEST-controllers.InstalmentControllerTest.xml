@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< Updated upstream
 <testsuite name="controllers.InstalmentControllerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:42:00.442Z" hostname="MSI" time="0.01">
   <properties/>
   <testcase name="testTambahCicilanSuccess()" classname="controllers.InstalmentControllerTest" time="0.01"/>
+=======
+<testsuite name="controllers.InstalmentControllerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:33:29.073Z" hostname="MSI" time="0.013">
+  <properties/>
+  <testcase name="testTambahCicilanSuccess()" classname="controllers.InstalmentControllerTest" time="0.013"/>
+>>>>>>> Stashed changes
   <system-out><![CDATA[ Starting database seeding...
  Database connection established
  Database seeding completed successfully!
