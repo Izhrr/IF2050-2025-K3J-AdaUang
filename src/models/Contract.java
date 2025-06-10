@@ -143,6 +143,17 @@ public class Contract extends BaseModel {
         return contract;
     }
 
+    private boolean update() throws SQLException {
+    String sql = "UPDATE kontrak SET jumlah_bayar=?, status=? WHERE id_kontrak=?";
+    try (Connection conn = getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, this.jumlah_bayar);
+        stmt.setBoolean(2, this.status);
+        stmt.setInt(3, this.id_kontrak);
+        return stmt.executeUpdate() > 0;
+    }
+}
+
     // Getters and Setters
     public String getFormattedTotal() {
         return NumberFormat.getCurrencyInstance(new Locale("id", "ID")).format(this.total);

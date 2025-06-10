@@ -1,12 +1,7 @@
 package views;
 
-import controllers.UserController;
 import controllers.AuthController;
-import models.User;
-
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.table.*;
+import controllers.UserController;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -14,6 +9,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.table.*;
+import models.User;
 
 public class UserManagementView extends JPanel {
     private final UserController userController;
@@ -303,6 +302,7 @@ public class UserManagementView extends JPanel {
         panel.setBorder(new MatteBorder(0, 1, 0, 0, new Color(220, 220, 220)));
         panel.setVisible(false);
         ImageIcon closeIcon = createIcon("/assets/close_icon.png", 20, 20);
+
         JButton closeButton = new JButton(closeIcon);
         closeButton.setBounds(305, 15, 30, 30);
         closeButton.setBorderPainted(false);
@@ -311,11 +311,13 @@ public class UserManagementView extends JPanel {
         closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         closeButton.addActionListener(e -> hideSidePanels());
         panel.add(closeButton);
+        
         JLabel titleLabel = new JLabel("Ganti Role User");
         titleLabel.setFont(new Font("Montserrat", Font.BOLD, 22));
         titleLabel.setForeground(new Color(39, 49, 157));
         titleLabel.setBounds(30, 40, 250, 30);
         panel.add(titleLabel);
+
         JLabel usernameTitleLabel = new JLabel("Username");
         usernameTitleLabel.setFont(new Font("Montserrat", Font.PLAIN, 14));
         usernameTitleLabel.setForeground(Color.GRAY);
@@ -326,6 +328,7 @@ public class UserManagementView extends JPanel {
         editUsernameLabel.setForeground(new Color(50, 50, 50));
         editUsernameLabel.setBounds(30, 110, 280, 25);
         panel.add(editUsernameLabel);
+
         JLabel roleTitleLabel = new JLabel("Role");
         roleTitleLabel.setFont(new Font("Montserrat", Font.PLAIN, 14));
         roleTitleLabel.setForeground(Color.GRAY);
@@ -335,12 +338,15 @@ public class UserManagementView extends JPanel {
         editRoleComboBox.setFont(new Font("Montserrat", Font.PLAIN, 16));
         editRoleComboBox.setBounds(30, 185, 280, 40);
         panel.add(editRoleComboBox);
+
         JButton saveButton = new JButton("Simpan Perubahan");
         saveButton.setFont(new Font("Montserrat", Font.BOLD, 16));
         saveButton.setBackground(new Color(39, 49, 157));
         saveButton.setForeground(Color.WHITE);
         saveButton.setFocusPainted(false);
+        saveButton.setBorderPainted(false);
         saveButton.setBounds(30, 255, 280, 45);
+        saveButton.setOpaque(true);
         saveButton.addActionListener(e -> saveRoleChanges());
         panel.add(saveButton);
         return panel;
