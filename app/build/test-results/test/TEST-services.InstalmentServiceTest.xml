@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="services.InstalmentServiceTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:42:01.393Z" hostname="MSI" time="0.021">
+  <properties/>
+  <testcase name="testGetAllCicilan()" classname="services.InstalmentServiceTest" time="0.003"/>
+  <testcase name="testAddCicilanSuccess()" classname="services.InstalmentServiceTest" time="0.011"/>
+  <testcase name="testAddCicilanFailWrongTenor()" classname="services.InstalmentServiceTest" time="0.002"/>
+  <testcase name="testAddCicilanFailWrongAmount()" classname="services.InstalmentServiceTest" time="0.004"/>
+  <system-out><![CDATA[ Starting database seeding...
+ Database connection established
+ Database seeding completed successfully!
+
+ SEEDED TEST ACCOUNTS:
+ID | Username	| Full Name		| Branch	| Role	| Login Info
+-------------------------------------------------------------------------------
+1  | admin       | Administrator       | Jakarta   | admin | admin/admin123
+2  | izhrr       | Izhrr - Project Lead| Bandung   | admin | izhrr/izhrr123
+3  | testuser    | Test User           | Surabaya  | staff | testuser/password123
+4  | demo        | Demo Account        | Jakarta   | manager| demo/demo123
+
+ SEEDED INSTALMENT DATA:
+ID | ID Kontrak | Nama Peminjam       | Jumlah Cicilan | Tanggal Cicilan
+------------------------------------------------------------------------
+1  | 1          | Budi Santoso         | Rp1100000       | 2024-12-01
+2  | 1          | Budi Santoso         | Rp1100000       | 2025-01-01
+3  | 1          | Budi Santoso         | Rp1100000       | 2025-02-01
+4  | 1          | Budi Santoso         | Rp1100000       | 2025-03-01
+5  | 1          | Budi Santoso         | Rp1100000       | 2025-04-01
+6  | 1          | Budi Santoso         | Rp1100000       | 2025-05-01
+7  | 1          | Budi Santoso         | Rp1100000       | 2025-06-01
+8  | 1          | Budi Santoso         | Rp1100000       | 2025-07-01
+9  | 1          | Budi Santoso         | Rp1100000       | 2025-08-01
+10 | 1          | Budi Santoso         | Rp1100000       | 2025-09-01
+11 | 1          | Budi Santoso         | Rp1100000       | 2025-10-01
+12 | 1          | Budi Santoso         | Rp1100000       | 2025-11-01
+13 | 2          | Siti Aminah          | Rp2200000       | 2024-11-15
+14 | 2          | Siti Aminah          | Rp2200000       | 2024-12-15
+15 | 2          | Siti Aminah          | Rp2200000       | 2025-01-15
+16 | 3          | Agus Wijaya          | Rp1100000       | 2025-01-10
+17 | 3          | Agus Wijaya          | Rp1100000       | 2025-02-10
+18 | 3          | Agus Wijaya          | Rp1100000       | 2025-03-10
+19 | 3          | Agus Wijaya          | Rp1100000       | 2025-04-10
+20 | 3          | Agus Wijaya          | Rp1100000       | 2025-05-10
+21 | 3          | Agus Wijaya          | Rp1100000       | 2025-06-10
+
+ SEEDED CONTRACT DATA:
+ID | Nama Peminjam       | Total Pinjaman | Tenor | Total Bayar | Cicilan/Bulan | Status   | Tanggal Pinjam
+-----------------------------------------------------------------------------------------------------------
+1  | Budi Santoso         | Rp12000000      | 12    | Rp13200000    | Rp1100000       | LUNAS    | 2024-12-01
+2  | Siti Aminah          | Rp48000000      | 24    | Rp52800000    | Rp2200000       | LUNAS    | 2024-11-15
+3  | Agus Wijaya          | Rp6000000       | 6     | Rp6600000     | Rp1100000       | LUNAS    | 2025-01-10
+Added cicilan: ID=12, Kontrak=1
+Added cicilan: ID=11, Kontrak=1
+Added cicilan: ID=10, Kontrak=1
+Added cicilan: ID=9, Kontrak=1
+Added cicilan: ID=8, Kontrak=1
+Added cicilan: ID=7, Kontrak=1
+Added cicilan: ID=6, Kontrak=1
+Added cicilan: ID=5, Kontrak=1
+Added cicilan: ID=4, Kontrak=1
+Added cicilan: ID=3, Kontrak=1
+Added cicilan: ID=2, Kontrak=1
+Added cicilan: ID=1, Kontrak=1
+Added cicilan: ID=15, Kontrak=2
+Added cicilan: ID=14, Kontrak=2
+Added cicilan: ID=13, Kontrak=2
+Added cicilan: ID=21, Kontrak=3
+Added cicilan: ID=20, Kontrak=3
+Added cicilan: ID=19, Kontrak=3
+Added cicilan: ID=18, Kontrak=3
+Added cicilan: ID=17, Kontrak=3
+Added cicilan: ID=16, Kontrak=3
+Found 21 cicilan records in database
+Cicilan berhasil ditambahkan. Jumlah bayar sekarang: 4200000 dari total pinjaman: 48000000
+]]></system-out>
+  <system-err><![CDATA[INVALID: Tenor melebihi batas maksimal!
+Tenor maksimal untuk kontrak ini: 24
+Tenor yang dimasukkan: 99
+INVALID: Jumlah cicilan tidak sesuai!
+Jumlah yang dimasukkan: 2201000
+Jumlah cicilan yang seharusnya: 2200000
+]]></system-err>
+</testsuite>
