@@ -89,7 +89,7 @@ public class DatabaseSeeder {
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             Object[][] testContracts = {
                     {"Budi Santoso", 12000000, 12, 1000000, true, LocalDate.of(2024, 12, 1), 1},
-                    {"Siti Aminah", 48000000, 24, 2000000, false, LocalDate.of(2024, 11, 15), 2},
+                    {"Siti Aminah", 48000000, 24, 2000000, true, LocalDate.of(2024, 11, 15), 2},
                     {"Agus Wijaya", 6000000, 6, 1000000, true, LocalDate.of(2025, 1, 10), 3}
             };
 
