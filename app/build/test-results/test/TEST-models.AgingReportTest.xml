@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="models.AgingReportTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:42:00.854Z" hostname="MSI" time="0.068">
+  <properties/>
+  <testcase name="testGetAgingReportByBranchReturnsList()" classname="models.AgingReportTest" time="0.02"/>
+  <testcase name="testAgingReportGetterSetter()" classname="models.AgingReportTest" time="0.001"/>
+  <testcase name="testDebugAgingDataDoesNotThrow()" classname="models.AgingReportTest" time="0.027"/>
+  <testcase name="testGetAgingReportByBranchAndDateReturnsList()" classname="models.AgingReportTest" time="0.017"/>
+  <system-out><![CDATA[ Database connection established
+ Database connection established
+
+=== DEBUG AGING REPORT DATA (Current: 2025-06-11) ===
+ID | Nama           | Branch   | Start Date | Should Pay | Paid | Overdue | Outstanding
+-------------------------------------------------------------------------------------------
+1  | Budi Santoso    | Jakarta  | 2024-12-01 | 7          | 12   | 0       | Rp 0
+2  | Siti Aminah     | Bandung  | 2024-11-15 | 7          | 3    | 4       | Rp 8,800,000
+3  | Agus Wijaya     | Surabaya | 2025-01-10 | 6          | 6    | 0       | Rp 0
+ Database connection established
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

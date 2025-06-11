@@ -63,6 +63,7 @@ public class SidebarView extends JPanel {
                 case User.ROLE_MANAGER:
                     topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Manajemen Kontrak", "kontrak"));
                     topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Manajemen Cicilan", "cicilan"));
+                    topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Laporan Umur Piutang", "aging-report"));
                     break;
             }
         }
