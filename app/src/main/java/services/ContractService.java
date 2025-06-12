@@ -1,18 +1,15 @@
 package services;
 
-import models.Contract;
 import java.util.List;
+import models.Contract;
 
 public class ContractService {
     
     public List<Contract> getAllContracts() {
-        return Contract.findAllAktif();
+        return Contract.findAll();
     }
     
     public boolean createContract(String namaUser, int total, int tenor, int idUser) {
-        if (namaUser == null || namaUser.trim().isEmpty() || total <= 0 || tenor <= 0) {
-            return false;
-        }
         Contract contract = new Contract();
         contract.setNama_user(namaUser);
         contract.setTotal(total);
@@ -21,10 +18,10 @@ public class ContractService {
         contract.setStatus(true);
         contract.setTanggal_pinjam(new java.util.Date());
         contract.setId_user(idUser);
-
+        
         return contract.save();
     }
-        
+    
     public Contract getContractById(int id) {
         return Contract.findById(id);
     }
