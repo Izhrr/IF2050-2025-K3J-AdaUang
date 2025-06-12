@@ -1,10 +1,9 @@
 package views;
 
-import controllers.AuthController;
 import config.AppConstants;
-
-import javax.swing.*;
+import controllers.AuthController;
 import java.awt.*;
+import javax.swing.*;
 
 public class LoginView extends BaseView {
     private final JTextField usernameField;
@@ -41,8 +40,6 @@ public class LoginView extends BaseView {
                 g2d.setPaint(gp);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
 
-                // Gambar/logo custom (letakkan asset Anda di sini)
-                // Contoh: src/assets/login-illustration.png
                 ImageIcon img = new ImageIcon("src/assets/logo.png");
                 g.drawImage(img.getImage(), 0, 0, getWidth(), getHeight(), null);
             }
@@ -98,6 +95,7 @@ public class LoginView extends BaseView {
         passwordField.setFont(AppConstants.getMontserrat(16f, Font.PLAIN));
         passwordField.setBackground(new Color(250, 250, 250));
         passwordField.setBorder(BorderFactory.createLineBorder(new Color(210, 210, 210), 2));
+        passwordField.setEchoChar('*');
         rightPanel.add(passwordField);
 
         // Tombol Login
@@ -108,6 +106,7 @@ public class LoginView extends BaseView {
         loginButton.setFont(AppConstants.getMontserrat(18f, Font.BOLD));
         loginButton.setFocusPainted(false);
         loginButton.setBorder(BorderFactory.createEmptyBorder());
+        loginButton.setOpaque(true);
         rightPanel.add(loginButton);
 
         // Register link
@@ -137,8 +136,9 @@ public class LoginView extends BaseView {
         }
         boolean success = authController.login(username, password);
         if (success) {
-            showMessage("Login berhasil! Selamat datang, " + authController.getCurrentUser().getDisplayName());
+            showMessage("Login berhasil! Selamat datang, " + authController.getCurrentUser().getFullname());
             // TODO: lanjut ke dashboard/main menu
+            new MainView(authController).setVisible(true);
             dispose();
         } else {
             showMessage("Login gagal! Username atau password salah.");

@@ -10,14 +10,15 @@ public class AuthService {
     }
 
     // Register: return User jika sukses, null jika gagal
-    public User register(String username, String fullName, String password, String confirmPassword, String role) {
-        if (username == null || fullName == null || password == null || confirmPassword == null) return null;
+    public User register(String username, String fullname, String password, String confirmPassword, String role, String branch) {
+        if (username == null || fullname == null || password == null || confirmPassword == null || branch == null)
+            return null;
         if (!password.equals(confirmPassword)) return null;
         if (User.usernameExists(username)) return null;
-        if (role == null || (!role.equals(User.ROLE_USER) && !role.equals(User.ROLE_ADMIN))) {
-            role = User.ROLE_USER;
+        if (role == null || (!role.equals(User.ROLE_STAFF) && !role.equals(User.ROLE_ADMIN) && !role.equals(User.ROLE_MANAGER))) {
+            role = User.ROLE_STAFF;
         }
-        User user = new User(username, fullName, role, password);
+        User user = new User(username, fullname, password, branch, role);
         if (!user.isValid()) return null;
         boolean success = user.save();
         return success ? user : null;

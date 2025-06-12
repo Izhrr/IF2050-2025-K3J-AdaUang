@@ -39,13 +39,13 @@ public class DatabaseConfig {
         properties.setProperty("db.port", "3306");
         properties.setProperty("db.name", "adauang_db");
         properties.setProperty("db.username", "root");
-        properties.setProperty("db.password", "izhar1902");
+        properties.setProperty("db.password", "<<YOUR_PASSWORD_HERE>>");
         properties.setProperty("db.table.users", "users");
         properties.setProperty("app.name", "AdaUang");
         properties.setProperty("debug.mode", "true");
     }
     
-    // Getter methods
+    // Getter
     public String getDbUrl() {
         return String.format("jdbc:mysql://%s:%s/%s", 
             getProperty("db.host"), 

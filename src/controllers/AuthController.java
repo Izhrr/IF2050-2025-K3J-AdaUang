@@ -22,8 +22,8 @@ public class AuthController {
     }
 
     // Proses register, return true jika sukses
-    public boolean register(String username, String fullName, String password, String confirmPassword, String role) {
-        User user = authService.register(username, fullName, password, confirmPassword, role);
+    public boolean register(String username, String fullname, String password, String confirmPassword, String role, String branch) {
+        User user = authService.register(username, fullname, password, confirmPassword, role, branch);
         if (user != null) {
             currentUser = user;
             return true;

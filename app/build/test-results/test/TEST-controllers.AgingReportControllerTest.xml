@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="controllers.AgingReportControllerTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:41:59.443Z" hostname="MSI" time="0.361">
+  <properties/>
+  <testcase name="testGetAgingReportReturnsList()" classname="controllers.AgingReportControllerTest" time="0.333"/>
+  <testcase name="testGetAgingReportByMonthYearReturnsList()" classname="controllers.AgingReportControllerTest" time="0.028"/>
+  <system-out><![CDATA[Config file not found, using default values
+ Database connection established
+ Database connection established
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

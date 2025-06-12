@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< Updated upstream
+<testsuite name="models.UserTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:42:00.935Z" hostname="MSI" time="0.002">
+  <properties/>
+  <testcase name="testRoleConstants()" classname="models.UserTest" time="0.0"/>
+  <testcase name="testRoleChecker()" classname="models.UserTest" time="0.001"/>
+  <testcase name="testIsValid()" classname="models.UserTest" time="0.0"/>
+  <testcase name="testToStringDisplayName()" classname="models.UserTest" time="0.0"/>
+=======
+<testsuite name="models.UserTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-06-10T18:33:29.408Z" hostname="MSI" time="0.002">
+  <properties/>
+  <testcase name="testRoleConstants()" classname="models.UserTest" time="0.0"/>
+  <testcase name="testRoleChecker()" classname="models.UserTest" time="0.0"/>
+  <testcase name="testIsValid()" classname="models.UserTest" time="0.0"/>
+  <testcase name="testToStringDisplayName()" classname="models.UserTest" time="0.001"/>
+>>>>>>> Stashed changes
+  <testcase name="testUsernameGetterSetter()" classname="models.UserTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
