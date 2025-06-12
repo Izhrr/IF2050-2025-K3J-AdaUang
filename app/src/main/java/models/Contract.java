@@ -35,15 +35,13 @@ public class Contract extends BaseModel {
             if (isNewRecord()) {
                 return insert();
             } else {
-                // logika update
-                return false;
+                return update(); // <-- panggil update di sini!
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
-    
     private boolean insert() throws SQLException {
         // Perbaiki: Hitung jumlah_bayar_bunga dari total, bukan jumlah_bayar
         this.jumlah_bayar_bunga = (int) Math.round(this.total * 1.1);
@@ -146,15 +144,22 @@ public class Contract extends BaseModel {
     }
 
     private boolean update() throws SQLException {
-    String sql = "UPDATE kontrak SET jumlah_bayar=?, status=? WHERE id_kontrak=?";
-    try (Connection conn = getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setInt(1, this.jumlah_bayar);
-        stmt.setBoolean(2, this.status);
-        stmt.setInt(3, this.id_kontrak);
-        return stmt.executeUpdate() > 0;
+        String sql = "UPDATE kontrak SET nama_user=?, total=?, tenor=?, jumlah_bayar=?, jumlah_bayar_bunga=?, cicilan_per_bulan=?, status=?, tanggal_pinjam=?, id_user=? WHERE id_kontrak=?";
+        try (Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, this.nama_user);
+            stmt.setInt(2, this.total);
+            stmt.setInt(3, this.tenor);
+            stmt.setInt(4, this.jumlah_bayar);
+            stmt.setInt(5, this.jumlah_bayar_bunga);
+            stmt.setInt(6, this.cicilan_per_bulan);
+            stmt.setBoolean(7, this.status);
+            stmt.setDate(8, new java.sql.Date(this.tanggal_pinjam.getTime()));
+            stmt.setInt(9, this.id_user);
+            stmt.setInt(10, this.id_kontrak);
+            return stmt.executeUpdate() > 0;
+        }
     }
-}
 
     /**
      * Ambil semua kontrak yang masih aktif (belum lunas)

@@ -72,6 +72,7 @@ public class AuthServiceTest {
         assertEquals(User.ROLE_STAFF, user.getRole());
     }
 
+
     @Test
     void testRegisterNullInput() {
         assertNull(authService.register(null, "nama", "pw", "pw", User.ROLE_STAFF, "Jakarta"));

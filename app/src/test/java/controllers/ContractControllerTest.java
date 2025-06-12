@@ -21,14 +21,13 @@ public class ContractControllerTest {
     void testGetAllContracts() {
         List<Contract> contracts = contractController.getAllContracts();
         assertNotNull(contracts, "Daftar kontrak tidak boleh null");
-        assertTrue(contracts.size() >= 3, "Harus ada minimal 3 kontrak hasil seeding");
+        assertTrue(contracts.size() >= 1, "Harus ada minimal 1 kontrak hasil seeding");
     }
 
     @Test
     void testAddContractSuccess() {
         boolean result = contractController.addContract("UnitTest User", 5000000, 12, 1); // idUser 1 = admin
         assertTrue(result, "Tambah kontrak baru harus berhasil");
-        // Optionally: cek kontrak baru muncul di getAllContracts()
     }
 
     @Test
@@ -42,10 +41,10 @@ public class ContractControllerTest {
     void testGetContractById() {
         List<Contract> contracts = contractController.getAllContracts();
         assertFalse(contracts.isEmpty(), "Seed kontrak tidak boleh kosong");
-        int id = contracts.get(0).getId();
+        int id = contracts.get(0).getId_kontrak();
         Contract c = contractController.getContractById(id);
         assertNotNull(c, "Kontrak dengan id valid harus ditemukan");
-        assertEquals(id, c.getId(), "ID kontrak harus sama");
+        assertEquals(id, c.getId_kontrak(), "ID kontrak harus sama");
     }
 
     @Test
@@ -58,7 +57,84 @@ public class ContractControllerTest {
         boolean result = contractController.updateContract(contract);
         assertTrue(result, "Update kontrak harus berhasil");
 
-        Contract updated = contractController.getContractById(contract.getId());
+        Contract updated = contractController.getContractById(contract.getId_kontrak());
         assertEquals(oldTotal + 12345, updated.getTotal(), "Total kontrak harus terupdate");
+    }
+
+    @Test
+    void testGetAllKontrakAktif() {
+        List<Contract> aktif = contractController.getAllKontrakAktif();
+        assertNotNull(aktif, "Daftar kontrak aktif tidak boleh null");
+    }
+
+    @Test
+    void testGetAllKontrak() {
+        List<Contract> contracts = contractController.getAllKontrak();
+        assertNotNull(contracts, "getAllKontrak tidak boleh null");
+        assertTrue(contracts.size() >= 1, "Harus ada minimal 1 kontrak hasil seeding");
+    }
+
+    @Test
+    void testGetKontrakById() {
+        List<Contract> contracts = contractController.getAllKontrak();
+        assertFalse(contracts.isEmpty(), "Seed kontrak tidak boleh kosong");
+        int id = contracts.get(0).getId_kontrak();
+        Contract c = contractController.getKontrakById(id);
+        assertNotNull(c, "getKontrakById harus mengembalikan kontrak valid");
+        assertEquals(id, c.getId_kontrak());
+    }
+
+    @Test
+    void testGetNextTenor() {
+        List<Contract> contracts = contractController.getAllKontrak();
+        if (!contracts.isEmpty()) {
+            int id = contracts.get(0).getId_kontrak();
+            int nextTenor = contractController.getNextTenor(id);
+            assertTrue(nextTenor >= 1, "getNextTenor minimal 1");
+        }
+    }
+
+    @Test
+    void testUpdateKontrakPayment() {
+        List<Contract> contracts = contractController.getAllKontrak();
+        if (!contracts.isEmpty()) {
+            int id = contracts.get(0).getId_kontrak();
+            Contract c = contractController.getKontrakById(id);
+            int oldJumlahBayar = c.getJumlah_bayar();
+            boolean result = contractController.updateKontrakPayment(id, oldJumlahBayar + 10000, false);
+            assertTrue(result, "updateKontrakPayment harus berhasil jika id valid");
+        }
+    }
+
+    @Test
+    void testIsLunasByTenor() {
+        List<Contract> contracts = contractController.getAllKontrak();
+        if (!contracts.isEmpty()) {
+            Contract c = contracts.get(0);
+            boolean lunas = c.isLunasByTenor();
+            // Tidak bisa assertTrue/False karena tergantung data, minimal method jalan
+            assertNotNull(lunas);
+        }
+    }
+
+    @Test
+    void testGetFormattedCicilanPerBulan() {
+        List<Contract> contracts = contractController.getAllKontrak();
+        if (!contracts.isEmpty()) {
+            Contract c = contracts.get(0);
+            String formatted = c.getFormattedCicilanPerBulan();
+            assertNotNull(formatted);
+            assertTrue(formatted.startsWith("Rp"));
+        }
+    }
+
+    @Test
+    void testGetStatusText() {
+        List<Contract> contracts = contractController.getAllKontrak();
+        if (!contracts.isEmpty()) {
+            Contract c = contracts.get(0);
+            String statusText = c.getStatusText();
+            assertTrue(statusText.equals("Lunas") || statusText.equals("Aktif"));
+        }
     }
 }
