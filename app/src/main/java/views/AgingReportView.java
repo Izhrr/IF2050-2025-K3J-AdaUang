@@ -98,110 +98,235 @@ public class AgingReportView extends JPanel {
         filterPanel.add(refreshButton);
 
         return filterPanel;
-... (232 lines left)
-Collapse
-message.txt
-15 KB
-instalmentview
-package views;
-
-import controllers.AuthController;
-import controllers.ContractController;
-import controllers.InstalmentController;
-import models.Instalment;
-Expand
-message.txt
-16 KB
-package controllers;
-
-import models.AgingReport;
-import services.AgingReportService;
-import java.util.List;
-
-public class AgingReportController extends BaseController {
-
-    private final AgingReportService agingReportService;
-
-    public AgingReportController() {
-        this.agingReportService = new AgingReportService();
-    }
-    
-    public List<AgingReport> getAgingReport() {
-        return agingReportService.getAgingReportByBranch();
     }
 
-    public List<AgingReport> getAgingReportByMonthYear(int month, int year) {
-        return agingReportService.getAgingReportByBranchAndDate(month, year);
-    }
-    
-    // Tambahkan method baru untuk summary
-    public AgingReport getAgingReportSummary() {
-        return agingReportService.getAgingReportSummary();
-    }
-    
-    public AgingReport getAgingReportSummaryByMonthYear(int month, int year) {
-        return agingReportService.getAgingReportSummaryByDate(month, year);
-    }
-}
-package controllers;
+    private JPanel createTablesContainer() {
+        JPanel tablesContainer = new JPanel(new BorderLayout(0, 20));
+        tablesContainer.setOpaque(false);
 
-import models.Instalment;
-import services.InstalmentService;
-import java.time.LocalDate;
-import java.util.List;
+        // Summary table di atas
+        JPanel summaryContainer = createSummaryTableContainer();
+        tablesContainer.add(summaryContainer, BorderLayout.NORTH);
 
-public class InstalmentController extends BaseController {
-    
-    private final InstalmentService instalmentService;
+        // Detail table per cabang di bawah
+        JPanel detailContainer = createDetailTableContainer();
+        tablesContainer.add(detailContainer, BorderLayout.CENTER);
 
-    public InstalmentController() {
-        this.instalmentService = new InstalmentService();
+        return tablesContainer;
     }
 
+    private JPanel createSummaryTableContainer() {
+        JPanel summaryContainer = new JPanel(new BorderLayout());
+        summaryContainer.setBackground(Color.WHITE);
+        summaryContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(100, 100, 100), 1),
+            "RINGKASAN SEMUA CABANG",
+            0, 0,
+            new Font("Montserrat", Font.BOLD, 16),
+            new Color(100, 100, 100)
+        ));
 
-    public boolean addInstalment(int idKontrak, int jumlah, int tenor, LocalDate tanggal, int idStaff) {
+        String[] columns = {"Total Nasabah", "1-30 Hari", "31-60 Hari", "61-90 Hari", ">90 Hari", "Total"};
+        summaryTableModel = new DefaultTableModel(columns, 0) {
+            @Override public boolean isCellEditable(int row, int col) { return false; }
+        };
+        summaryTable = new JTable(summaryTableModel);
+        setupSummaryTableStyle();
+
+        JScrollPane summaryScrollPane = new JScrollPane(summaryTable);
+        summaryScrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        summaryScrollPane.getViewport().setBackground(Color.WHITE);
+        summaryScrollPane.setPreferredSize(new Dimension(0, 80)); // Set tinggi fixed
+
+        summaryContainer.add(summaryTable.getTableHeader(), BorderLayout.NORTH);
+        summaryContainer.add(summaryScrollPane, BorderLayout.CENTER);
+
+        return summaryContainer;
+    }
+
+    private JPanel createDetailTableContainer() {
+        JPanel detailContainer = new JPanel(new BorderLayout());
+        detailContainer.setBackground(Color.WHITE);
+        detailContainer.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(100, 100, 100), 1),
+            "DETAIL PER CABANG",
+            0, 0,
+            new Font("Montserrat", Font.BOLD, 16),
+            new Color(100, 100, 100)
+        ));
+
+        String[] columns = {"Cabang", "Total Nasabah", "1-30 Hari", "31-60 Hari", "61-90 Hari", ">90 Hari", "Total"};
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override public boolean isCellEditable(int row, int col) { return false; }
+        };
+        agingTable = new JTable(tableModel);
+        setupTableStyle();
+
+        JScrollPane scrollPane = new JScrollPane(agingTable);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        scrollPane.getViewport().setBackground(Color.WHITE);
+
+        detailContainer.add(agingTable.getTableHeader(), BorderLayout.NORTH);
+        detailContainer.add(scrollPane, BorderLayout.CENTER);
+
+        return detailContainer;
+    }
+
+    private void setupSummaryTableStyle() {
+        Color borderColor = new Color(220, 220, 220);
+        summaryTable.setRowHeight(50);
+        summaryTable.setFont(new Font("Montserrat", Font.BOLD, 16));
+        summaryTable.setSelectionBackground(new Color(235, 240, 255));
+        summaryTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        summaryTable.setShowGrid(true);
+        summaryTable.setGridColor(borderColor);
+        summaryTable.setIntercellSpacing(new Dimension(0, 0));
+
+        JTableHeader header = summaryTable.getTableHeader();
+        header.setPreferredSize(new Dimension(100, 40));
+        header.setFont(new Font("Montserrat", Font.BOLD, 14));
+        header.setBackground(new Color(245, 247, 250));
+        header.setForeground(new Color(100, 100, 100));
+        header.setBorder(BorderFactory.createLineBorder(borderColor));
+
+        // Right-align currency columns
+        DefaultTableCellRenderer currencyRenderer = new DefaultTableCellRenderer();
+        currencyRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+        currencyRenderer.setFont(new Font("Montserrat", Font.BOLD, 16));
+        
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        centerRenderer.setFont(new Font("Montserrat", Font.BOLD, 16));
+
+        summaryTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Total Nasabah
+        
+        for(int i = 1; i < summaryTable.getColumnCount(); i++){
+            summaryTable.getColumnModel().getColumn(i).setCellRenderer(currencyRenderer);
+        }
+
+        // Tambahkan mouse listener untuk toggle selection
+        setupToggleableSelection(summaryTable);
+    }
+
+    private void setupTableStyle() {
+        Color borderColor = new Color(220, 220, 220);
+        agingTable.setRowHeight(45);
+        agingTable.setFont(new Font("Montserrat", Font.PLAIN, 14));
+        agingTable.setSelectionBackground(new Color(235, 240, 255));
+        agingTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        agingTable.setShowGrid(true);
+        agingTable.setGridColor(borderColor);
+        agingTable.setIntercellSpacing(new Dimension(0, 0));
+
+        JTableHeader header = agingTable.getTableHeader();
+        header.setPreferredSize(new Dimension(100, 50));
+        header.setFont(new Font("Montserrat", Font.BOLD, 14));
+        header.setBackground(new Color(245, 247, 250));
+        header.setForeground(new Color(100, 100, 100));
+        header.setBorder(BorderFactory.createLineBorder(borderColor));
+
+        // Right-align currency columns
+        DefaultTableCellRenderer currencyRenderer = new DefaultTableCellRenderer();
+        currencyRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+        
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        agingTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Cabang
+        agingTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer); // Total Nasabah
+        
+        for(int i = 2; i < agingTable.getColumnCount(); i++){
+            agingTable.getColumnModel().getColumn(i).setCellRenderer(currencyRenderer);
+        }
+
+        // Tambahkan mouse listener untuk toggle selection
+        setupToggleableSelection(agingTable);
+    }
+
+    // Tambahkan method baru untuk handle toggle selection
+    private void setupToggleableSelection(JTable table) {
+        table.setSelectionModel(new DefaultListSelectionModel() {
+            private int lastSelectedRow = -1;
+            
+            @Override
+            public void setSelectionInterval(int index0, int index1) {
+                if (lastSelectedRow == index0) {
+                    // Jika row yang sama diklik ulang, clear selection
+                    clearSelection();
+                    lastSelectedRow = -1;
+                } else {
+                    // Jika row berbeda, select row tersebut
+                    super.setSelectionInterval(index0, index1);
+                    lastSelectedRow = index0;
+                }
+            }
+            
+            @Override
+            public void clearSelection() {
+                super.clearSelection();
+                lastSelectedRow = -1;
+            }
+        });
+    }
+
+    private void loadTableData() {
         try {
-            return instalmentService.createInstalment(idKontrak, jumlah, tenor, tanggal, idStaff);
+            // Debug data terlebih dahulu
+            AgingReport.debugAgingData();
+            
+            // Clear both tables
+            tableModel.setRowCount(0);
+            summaryTableModel.setRowCount(0);
+            
+            // Get selected month and year
+            int selectedMonth = monthComboBox.getSelectedIndex() + 1;
+            int selectedYear = (Integer) yearComboBox.getSelectedItem();
+            
+            // Load summary data
+            AgingReport summary = agingReportController.getAgingReportSummaryByMonthYear(selectedMonth, selectedYear);
+            long summaryTotal = summary.getAging1to30() + summary.getAging31to60() + 
+                              summary.getAging61to90() + summary.getAgingOver90();
+            
+            summaryTableModel.addRow(new Object[]{
+                summary.getTotalNasabah(),
+                formatCurrency(summary.getAging1to30()),
+                formatCurrency(summary.getAging31to60()),
+                formatCurrency(summary.getAging61to90()),
+                formatCurrency(summary.getAgingOver90()),
+                formatCurrency(summaryTotal)
+            });
+            
+            // Load detail data per branch
+            List<AgingReport> reports = agingReportController.getAgingReportByMonthYear(selectedMonth, selectedYear);
+            
+            System.out.println("Found " + reports.size() + " aging reports for " + selectedMonth + "/" + selectedYear);
+            System.out.println("Summary - Total Nasabah: " + summary.getTotalNasabah() + ", Total Outstanding: " + formatCurrency(summaryTotal));
+            
+            for (AgingReport report : reports) {
+                long totalOutstanding = report.getAging1to30() + report.getAging31to60() + 
+                                      report.getAging61to90() + report.getAgingOver90();
+                
+                tableModel.addRow(new Object[]{
+                    report.getBranch(),
+                    report.getTotalNasabah(),
+                    formatCurrency(report.getAging1to30()),
+                    formatCurrency(report.getAging31to60()),
+                    formatCurrency(report.getAging61to90()),
+                    formatCurrency(report.getAgingOver90()),
+                    formatCurrency(totalOutstanding)
+                });
+            }
         } catch (Exception e) {
-            System.err.println("Controller error adding instalment: " + e.getMessage());
-            return false;
+            e.printStackTrace();
         }
     }
 
-
-    public List<Instalment> getAllInstalments() {
-        return instalmentService.getAllInstalments();
+    private String formatCurrency(long amount) {
+        return NumberFormat.getCurrencyInstance(new Locale("id", "ID")).format(amount);
     }
 
-
-    public List<Instalment> getInstalmentsByContract(int idKontrak) {
-        return instalmentService.getInstalmentsByContract(idKontrak);
+    public void refreshData() {
+        System.out.println("\n🔄 Refreshing aging report data...");
+        loadTableData();
     }
-
-
-    public Instalment getInstalmentById(int id) {
-        return instalmentService.getInstalmentById(id);
-    }
-
-
-    public int getNextTenor(int idKontrak) {
-        return instalmentService.getNextTenor(idKontrak);
-    }
-
-
-    public LocalDate getLastPaymentDate(int idKontrak) {
-        return instalmentService.getLastPaymentDate(idKontrak);
-    }
-
-
-    public boolean validatePayment(int idKontrak, int tenor, LocalDate tanggal) {
-        return instalmentService.canPayInstalment(idKontrak, tenor, tanggal);
-    }
-
-
-    public LocalDate getMinimumPaymentDate(int idKontrak) {
-        LocalDate lastDate = instalmentService.getLastPaymentDate(idKontrak);
-        return lastDate != null ? lastDate.plusMonths(1) : LocalDate.now();
-    }
-
 }

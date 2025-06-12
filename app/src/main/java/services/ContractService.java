@@ -6,7 +6,7 @@ import java.util.List;
 public class ContractService {
     
     public List<Contract> getAllContracts() {
-        return Contract.findAllWithUserDetails();
+        return Contract.findAllAktif();
     }
     
     public boolean createContract(String namaUser, int total, int tenor, int idUser) {
