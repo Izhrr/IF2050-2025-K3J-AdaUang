@@ -34,15 +34,29 @@ public class DatabaseConfig {
     }
     
     private void setDefaultProperties() {
-        // Default fallback values
+        // Default fallback values untuk development lokal
         properties.setProperty("db.host", "127.0.0.1");
         properties.setProperty("db.port", "3306");
         properties.setProperty("db.name", "adauang_db");
         properties.setProperty("db.username", "root");
-        properties.setProperty("db.password", "Asdwxytyyn20");
+        properties.setProperty("db.password", "<<YOUR_PASSWORD_HERE>>"); // Ganti dengan password lokal Anda
         properties.setProperty("db.table.users", "users");
         properties.setProperty("app.name", "AdaUang");
         properties.setProperty("debug.mode", "true");
+        
+        // Override untuk CI/CD environment
+        overrideForCIEnvironment();
+    }
+
+    private void overrideForCIEnvironment() {
+        // Detect kalau running di GitHub Actions
+        String ciPassword = System.getenv("CI_DB_PASSWORD");
+        if (ciPassword != null) {
+            properties.setProperty("db.password", ciPassword);
+            System.out.println("Using CI database configuration");
+        } else {
+            System.out.println("Using local database configuration");
+        }
     }
     
     // Getter
@@ -89,4 +103,6 @@ public class DatabaseConfig {
             System.out.println("===============================");
         }
     }
+
+    //testing
 }
