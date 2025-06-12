@@ -7,67 +7,68 @@ on:
     branches: [ develop, main, restructure ]
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
-
+    
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: izhar1902
+          MYSQL_ROOT_PASSWORD: ci_test_password_2025
+          MYSQL_DATABASE: adauang_db
         ports:
           - 3306:3306
         options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=10
+          --health-retries=5
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew
-
-    - name: Wait for MySQL to be ready
-      run: |
-        for i in {1..30}; do
-          if mysqladmin ping -h"127.0.0.1" --user="root" --password="Asdwxytyyn20" --silent; then
-            break
-          fi
-          sleep 2
-        done
-
-    - name: Create adauang_db database
-      run: |
-        mysql -h 127.0.0.1 -u root -pAsdwxytyyn20 -e "CREATE DATABASE IF NOT EXISTS adauang_db;"
-
-    # Kalau ada schema.sql atau seeder manual, bisa import di sini:
-    # - name: Import schema (opsional)
-    #   run: |
-    #     mysql -h 127.0.0.1 -u root -pAsdwxytyyn20 adauang_db < path/to/schema.sql
-
-    - name: Build with Gradle
-      run: ./gradlew build
-
-    - name: Run Tests
-      run: ./gradlew test
-
-    - name: Create distribution package
-      run: ./gradlew distZip
-
-    - name: Upload Build Artifacts (distribution)
-      uses: actions/upload-artifact@v4
-      with:
-        name: distribution-zip
-        path: build/distributions/*.zip
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      
+      - name: Wait for MySQL to be ready
+        run: |
+          echo "Waiting for MySQL to start..."
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" --silent; then
+              echo "✅ MySQL is ready!"
+              break
+            fi
+            echo "⏳ Attempt $i: MySQL not ready yet, waiting 5 seconds..."
+            sleep 5
+          done
+          
+          # Verify database exists
+          echo "📋 Available databases:"
+          mysql -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" -e "SHOW DATABASES;"
+      
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+      
+      - name: Build with Gradle
+        env:
+          CI_DB_PASSWORD: ci_test_password_2025
+        run: ./gradlew build --no-daemon --info
+      
+      - name: Run Tests
+        env:
+          CI_DB_PASSWORD: ci_test_password_2025
+        run: ./gradlew test --no-daemon --info
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: build/reports/tests/
