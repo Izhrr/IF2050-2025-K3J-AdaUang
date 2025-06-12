@@ -33,9 +33,8 @@ public class AgingReport extends BaseModel {
             INNER JOIN (
                 SELECT 
                     k.id_kontrak,
-                    -- Hitung tenor yang seharusnya sudah dibayar (berdasarkan bulan yang berlalu + 1)
+                    -- Hitung tenor yang sudah dibayar (bulan yang difilter + 1)
                     LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, CURDATE()) + 1) as should_pay_tenor,
-                    -- Tenor tertinggi yang sudah dibayar
                     COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0) as paid_tenor,
                     -- Selisih = tenor yang tertunggak
                     GREATEST(0, 
@@ -82,33 +81,44 @@ public class AgingReport extends BaseModel {
             SELECT 
                 u.branch,
                 COUNT(DISTINCT k.id_kontrak) as total_nasabah,
-                SUM(CASE WHEN overdue_tenor = 1 THEN outstanding_amount ELSE 0 END) as aging_1_30,
-                SUM(CASE WHEN overdue_tenor = 2 THEN outstanding_amount ELSE 0 END) as aging_31_60,
-                SUM(CASE WHEN overdue_tenor = 3 THEN outstanding_amount ELSE 0 END) as aging_61_90,
-                SUM(CASE WHEN overdue_tenor > 3 THEN outstanding_amount ELSE 0 END) as aging_over_90
+                SUM(CASE WHEN months_overdue = 1 THEN k.cicilan_per_bulan ELSE 0 END) as aging_1_30,
+                SUM(CASE WHEN months_overdue = 2 THEN k.cicilan_per_bulan ELSE 0 END) as aging_31_60,
+                SUM(CASE WHEN months_overdue = 3 THEN k.cicilan_per_bulan ELSE 0 END) as aging_61_90,
+                SUM(CASE WHEN months_overdue > 3 THEN k.cicilan_per_bulan ELSE 0 END) as aging_over_90
             FROM kontrak k
             JOIN users u ON k.id_user = u.id_user
             INNER JOIN (
                 SELECT 
                     k.id_kontrak,
-                    -- Hitung tenor yang seharusnya sudah dibayar sampai tanggal tertentu
-                    LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) + 1) as should_pay_tenor,
-                    -- Tenor tertinggi yang sudah dibayar
-                    COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0) as paid_tenor,
-                    -- Selisih = tenor yang tertunggak
-                    GREATEST(0, 
-                        LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) + 1) - 
-                        COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
-                    ) as overdue_tenor,
-                    -- Outstanding amount
-                    k.cicilan_per_bulan * GREATEST(0, 
-                        LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) + 1) - 
-                        COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
-                    ) as outstanding_amount
+                    unpaid_tenor.tenor,
+                    -- Hitung berapa bulan overdue untuk setiap tenor yang belum dibayar
+                    GREATEST(1, TIMESTAMPDIFF(MONTH, 
+                        DATE_ADD(k.tanggal_pinjam, INTERVAL (unpaid_tenor.tenor - 1) MONTH), 
+                        ?
+                    ) + 1) as months_overdue
                 FROM kontrak k
+                INNER JOIN (
+                    -- Generate semua tenor yang sudah dibayar
+                    SELECT t.tenor
+                    FROM (
+                        SELECT 1 as tenor UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 
+                        UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10
+                        UNION SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14 UNION SELECT 15
+                        UNION SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19 UNION SELECT 20
+                        UNION SELECT 21 UNION SELECT 22 UNION SELECT 23 UNION SELECT 24 UNION SELECT 25
+                        UNION SELECT 26 UNION SELECT 27 UNION SELECT 28 UNION SELECT 29 UNION SELECT 30
+                        UNION SELECT 31 UNION SELECT 32 UNION SELECT 33 UNION SELECT 34 UNION SELECT 35 
+                        UNION SELECT 36
+                    ) t
+                ) unpaid_tenor ON unpaid_tenor.tenor <= k.tenor
                 WHERE k.status = true
-            ) overdue_calc ON k.id_kontrak = overdue_calc.id_kontrak
-            WHERE overdue_calc.overdue_tenor > 0
+                AND unpaid_tenor.tenor <= LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) + 1)
+                AND NOT EXISTS (
+                    SELECT 1 FROM cicilan c 
+                    WHERE c.id_kontrak = k.id_kontrak 
+                    AND c.tenor = unpaid_tenor.tenor
+                )
+            ) overdue_detail ON k.id_kontrak = overdue_detail.id_kontrak
             GROUP BY u.branch
             """;
 
@@ -119,7 +129,6 @@ public class AgingReport extends BaseModel {
             String dateStr = String.format("%d-%02d-01", year, month);
             stmt.setString(1, dateStr);
             stmt.setString(2, dateStr);
-            stmt.setString(3, dateStr);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -144,27 +153,45 @@ public class AgingReport extends BaseModel {
             SELECT 
                 'TOTAL SEMUA CABANG' as branch,
                 COUNT(DISTINCT k.id_kontrak) as total_nasabah,
-                SUM(CASE WHEN overdue_tenor = 1 THEN outstanding_amount ELSE 0 END) as aging_1_30,
-                SUM(CASE WHEN overdue_tenor = 2 THEN outstanding_amount ELSE 0 END) as aging_31_60,
-                SUM(CASE WHEN overdue_tenor = 3 THEN outstanding_amount ELSE 0 END) as aging_61_90,
-                SUM(CASE WHEN overdue_tenor > 3 THEN outstanding_amount ELSE 0 END) as aging_over_90
+                SUM(CASE WHEN months_overdue = 1 THEN k.cicilan_per_bulan ELSE 0 END) as aging_1_30,
+                SUM(CASE WHEN months_overdue = 2 THEN k.cicilan_per_bulan ELSE 0 END) as aging_31_60,
+                SUM(CASE WHEN months_overdue = 3 THEN k.cicilan_per_bulan ELSE 0 END) as aging_61_90,
+                SUM(CASE WHEN months_overdue > 3 THEN k.cicilan_per_bulan ELSE 0 END) as aging_over_90
             FROM kontrak k
             JOIN users u ON k.id_user = u.id_user
             INNER JOIN (
                 SELECT 
                     k.id_kontrak,
-                    GREATEST(0, 
-                        LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, CURDATE()) + 1) - 
-                        COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
-                    ) as overdue_tenor,
-                    k.cicilan_per_bulan * GREATEST(0, 
-                        LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, CURDATE()) + 1) - 
-                        COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
-                    ) as outstanding_amount
+                    unpaid_tenor.tenor,
+                    -- Hitung berapa bulan overdue untuk setiap tenor yang belum dibayar
+                    GREATEST(1, TIMESTAMPDIFF(MONTH, 
+                        DATE_ADD(k.tanggal_pinjam, INTERVAL (unpaid_tenor.tenor - 1) MONTH), 
+                        CURDATE()
+                    ) + 1) as months_overdue
                 FROM kontrak k
+                INNER JOIN (
+                    -- Generate semua tenor yang seharusnya sudah dibayar
+                    SELECT t.tenor
+                    FROM (
+                        SELECT 1 as tenor UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 
+                        UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10
+                        UNION SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14 UNION SELECT 15
+                        UNION SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19 UNION SELECT 20
+                        UNION SELECT 21 UNION SELECT 22 UNION SELECT 23 UNION SELECT 24 UNION SELECT 25
+                        UNION SELECT 26 UNION SELECT 27 UNION SELECT 28 UNION SELECT 29 UNION SELECT 30
+                        UNION SELECT 31 UNION SELECT 32 UNION SELECT 33 UNION SELECT 34 UNION SELECT 35 
+                        UNION SELECT 36
+                    ) t
+                ) unpaid_tenor ON unpaid_tenor.tenor <= k.tenor
                 WHERE k.status = true
-            ) overdue_calc ON k.id_kontrak = overdue_calc.id_kontrak
-            WHERE overdue_calc.overdue_tenor > 0
+                AND unpaid_tenor.tenor <= LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, CURDATE()) + 1)
+                -- Tenor seharusnya sudah dibayar tapi menunggak (tidak ada di tabel cicilan)
+                AND NOT EXISTS (
+                    SELECT 1 FROM cicilan c 
+                    WHERE c.id_kontrak = k.id_kontrak 
+                    AND c.tenor = unpaid_tenor.tenor
+                )
+            ) overdue_detail ON k.id_kontrak = overdue_detail.id_kontrak
             """;
 
         try (Connection conn = dbConnection.getConnection();
@@ -186,7 +213,6 @@ public class AgingReport extends BaseModel {
             e.printStackTrace();
         }
         
-        // Return empty summary if no data
         AgingReport emptySummary = new AgingReport();
         emptySummary.setBranch("TOTAL SEMUA CABANG");
         emptySummary.setTotalNasabah(0);
@@ -202,27 +228,44 @@ public class AgingReport extends BaseModel {
             SELECT 
                 'TOTAL SEMUA CABANG' as branch,
                 COUNT(DISTINCT k.id_kontrak) as total_nasabah,
-                SUM(CASE WHEN overdue_tenor = 1 THEN outstanding_amount ELSE 0 END) as aging_1_30,
-                SUM(CASE WHEN overdue_tenor = 2 THEN outstanding_amount ELSE 0 END) as aging_31_60,
-                SUM(CASE WHEN overdue_tenor = 3 THEN outstanding_amount ELSE 0 END) as aging_61_90,
-                SUM(CASE WHEN overdue_tenor > 3 THEN outstanding_amount ELSE 0 END) as aging_over_90
+                SUM(CASE WHEN months_overdue = 1 THEN k.cicilan_per_bulan ELSE 0 END) as aging_1_30,
+                SUM(CASE WHEN months_overdue = 2 THEN k.cicilan_per_bulan ELSE 0 END) as aging_31_60,
+                SUM(CASE WHEN months_overdue = 3 THEN k.cicilan_per_bulan ELSE 0 END) as aging_61_90,
+                SUM(CASE WHEN months_overdue > 3 THEN k.cicilan_per_bulan ELSE 0 END) as aging_over_90
             FROM kontrak k
             JOIN users u ON k.id_user = u.id_user
             INNER JOIN (
                 SELECT 
                     k.id_kontrak,
-                    GREATEST(0, 
-                        LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) + 1) - 
-                        COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
-                    ) as overdue_tenor,
-                    k.cicilan_per_bulan * GREATEST(0, 
-                        LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) + 1) - 
-                        COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0)
-                    ) as outstanding_amount
+                    unpaid_tenor.tenor,
+                    -- Hitung berapa bulan overdue untuk setiap tenor yang belum dibayar
+                    GREATEST(1, TIMESTAMPDIFF(MONTH, 
+                        DATE_ADD(k.tanggal_pinjam, INTERVAL (unpaid_tenor.tenor - 1) MONTH), 
+                        ?
+                    ) + 1) as months_overdue
                 FROM kontrak k
+                INNER JOIN (
+                    SELECT t.tenor
+                    FROM (
+                        SELECT 1 as tenor UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 
+                        UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10
+                        UNION SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14 UNION SELECT 15
+                        UNION SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19 UNION SELECT 20
+                        UNION SELECT 21 UNION SELECT 22 UNION SELECT 23 UNION SELECT 24 UNION SELECT 25
+                        UNION SELECT 26 UNION SELECT 27 UNION SELECT 28 UNION SELECT 29 UNION SELECT 30
+                        UNION SELECT 31 UNION SELECT 32 UNION SELECT 33 UNION SELECT 34 UNION SELECT 35 
+                        UNION SELECT 36
+                    ) t
+                ) unpaid_tenor ON unpaid_tenor.tenor <= k.tenor
                 WHERE k.status = true
-            ) overdue_calc ON k.id_kontrak = overdue_calc.id_kontrak
-            WHERE overdue_calc.overdue_tenor > 0
+                AND unpaid_tenor.tenor <= LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) + 1)
+                -- Tenor seharusnya sudah dibayar tapi menunggak (tidak ada di tabel cicilan)
+                AND NOT EXISTS (
+                    SELECT 1 FROM cicilan c 
+                    WHERE c.id_kontrak = k.id_kontrak 
+                    AND c.tenor = unpaid_tenor.tenor
+                )
+            ) overdue_detail ON k.id_kontrak = overdue_detail.id_kontrak
             """;
 
         try (Connection conn = dbConnection.getConnection();
@@ -248,7 +291,6 @@ public class AgingReport extends BaseModel {
             e.printStackTrace();
         }
         
-        // Return empty summary if no data
         AgingReport emptySummary = new AgingReport();
         emptySummary.setBranch("TOTAL SEMUA CABANG");
         emptySummary.setTotalNasabah(0);
