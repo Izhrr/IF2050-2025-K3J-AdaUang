@@ -33,9 +33,8 @@ public class AgingReport extends BaseModel {
             INNER JOIN (
                 SELECT 
                     k.id_kontrak,
-                    -- Hitung tenor yang seharusnya sudah dibayar (berdasarkan bulan yang berlalu + 1)
+                    -- Hitung tenor yang sudah dibayar (bulan yang difilter + 1)
                     LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, CURDATE()) + 1) as should_pay_tenor,
-                    -- Tenor tertinggi yang sudah dibayar
                     COALESCE((SELECT MAX(c.tenor) FROM cicilan c WHERE c.id_kontrak = k.id_kontrak), 0) as paid_tenor,
                     -- Selisih = tenor yang tertunggak
                     GREATEST(0, 
@@ -99,7 +98,7 @@ public class AgingReport extends BaseModel {
                     ) + 1) as months_overdue
                 FROM kontrak k
                 INNER JOIN (
-                    -- Generate semua tenor yang seharusnya sudah dibayar
+                    -- Generate semua tenor yang sudah dibayar
                     SELECT t.tenor
                     FROM (
                         SELECT 1 as tenor UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 
@@ -113,9 +112,7 @@ public class AgingReport extends BaseModel {
                     ) t
                 ) unpaid_tenor ON unpaid_tenor.tenor <= k.tenor
                 WHERE k.status = true
-                -- Tenor seharusnya sudah dibayar sampai tanggal tertentu
                 AND unpaid_tenor.tenor <= LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) + 1)
-                -- Tapi belum dibayar (tidak ada di tabel cicilan)
                 AND NOT EXISTS (
                     SELECT 1 FROM cicilan c 
                     WHERE c.id_kontrak = k.id_kontrak 
@@ -187,9 +184,8 @@ public class AgingReport extends BaseModel {
                     ) t
                 ) unpaid_tenor ON unpaid_tenor.tenor <= k.tenor
                 WHERE k.status = true
-                -- Tenor seharusnya sudah dibayar sampai tanggal tertentu
                 AND unpaid_tenor.tenor <= LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, CURDATE()) + 1)
-                -- Tapi belum dibayar (tidak ada di tabel cicilan)
+                -- Tenor seharusnya sudah dibayar tapi menunggak (tidak ada di tabel cicilan)
                 AND NOT EXISTS (
                     SELECT 1 FROM cicilan c 
                     WHERE c.id_kontrak = k.id_kontrak 
@@ -217,7 +213,6 @@ public class AgingReport extends BaseModel {
             e.printStackTrace();
         }
         
-        // Return empty summary if no data
         AgingReport emptySummary = new AgingReport();
         emptySummary.setBranch("TOTAL SEMUA CABANG");
         emptySummary.setTotalNasabah(0);
@@ -250,7 +245,6 @@ public class AgingReport extends BaseModel {
                     ) + 1) as months_overdue
                 FROM kontrak k
                 INNER JOIN (
-                    -- Generate semua tenor yang seharusnya sudah dibayar
                     SELECT t.tenor
                     FROM (
                         SELECT 1 as tenor UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 
@@ -264,9 +258,8 @@ public class AgingReport extends BaseModel {
                     ) t
                 ) unpaid_tenor ON unpaid_tenor.tenor <= k.tenor
                 WHERE k.status = true
-                -- Tenor seharusnya sudah dibayar sampai tanggal tertentu
                 AND unpaid_tenor.tenor <= LEAST(k.tenor, TIMESTAMPDIFF(MONTH, k.tanggal_pinjam, ?) + 1)
-                -- Tapi belum dibayar (tidak ada di tabel cicilan)
+                -- Tenor seharusnya sudah dibayar tapi menunggak (tidak ada di tabel cicilan)
                 AND NOT EXISTS (
                     SELECT 1 FROM cicilan c 
                     WHERE c.id_kontrak = k.id_kontrak 
@@ -298,7 +291,6 @@ public class AgingReport extends BaseModel {
             e.printStackTrace();
         }
         
-        // Return empty summary if no data
         AgingReport emptySummary = new AgingReport();
         emptySummary.setBranch("TOTAL SEMUA CABANG");
         emptySummary.setTotalNasabah(0);
