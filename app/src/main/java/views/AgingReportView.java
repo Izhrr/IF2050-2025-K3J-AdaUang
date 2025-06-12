@@ -90,7 +90,7 @@ public class AgingReportView extends JPanel {
         JButton refreshButton = new JButton("Refresh Data");
         refreshButton.setFont(new Font("Montserrat", Font.BOLD, 14));
         refreshButton.setBackground(new Color(26, 35, 80));
-        refreshButton.setForeground(new Color(39, 49, 157));
+        refreshButton.setForeground(Color.WHITE);
         refreshButton.setFocusPainted(false);
         refreshButton.setBorderPainted(false);
         refreshButton.setPreferredSize(new Dimension(130, 40));
