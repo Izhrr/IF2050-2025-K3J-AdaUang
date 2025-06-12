@@ -49,64 +49,49 @@ jobs:
             sleep 5
           done
       
+      
       - name: Setup Database Schema
         run: |
-          echo " Creating database tables..."
+          echo "🗄️ Creating database tables (as in DatabaseMigration.java)..."
           mysql -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" adauang_db << 'EOF'
           
-          -- Table users
           CREATE TABLE IF NOT EXISTS users (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            username VARCHAR(255) NOT NULL,
-            email VARCHAR(255) NOT NULL,
+            id_user INT PRIMARY KEY AUTO_INCREMENT,
+            username VARCHAR(50) UNIQUE NOT NULL,
+            fullname VARCHAR(100) NOT NULL,
             password VARCHAR(255) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            branch VARCHAR(50) NOT NULL,
+            role VARCHAR(20) DEFAULT 'user'
           );
 
-          -- Table kontrak
           CREATE TABLE IF NOT EXISTS kontrak (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            user_id INT,
-            branch VARCHAR(255),
-            title VARCHAR(255),
-            content TEXT,
-            amount DECIMAL(15,2),
-            status VARCHAR(50),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            id_kontrak INT PRIMARY KEY AUTO_INCREMENT,
+            nama_user VARCHAR(100) NOT NULL,
+            total INT NOT NULL,
+            tenor INT NOT NULL,
+            jumlah_bayar INT NOT NULL,
+            jumlah_bayar_bunga INT NOT NULL,
+            cicilan_per_bulan INT NOT NULL,
+            status BOOLEAN NOT NULL,
+            tanggal_pinjam DATE NOT NULL,
+            id_user INT NOT NULL,
+            FOREIGN KEY (id_user) REFERENCES users(id_user)
           );
 
-          -- Table cicilan  
           CREATE TABLE IF NOT EXISTS cicilan (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            kontrak_id INT,
-            user_id INT,
-            amount DECIMAL(15,2),
-            paid_amount DECIMAL(15,2) DEFAULT 0,
-            due_date DATE,
-            payment_date DATE NULL,
-            status VARCHAR(50) DEFAULT 'pending',
-            description TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (kontrak_id) REFERENCES kontrak(id),
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            id_cicilan INT PRIMARY KEY AUTO_INCREMENT,
+            id_kontrak INT NOT NULL,
+            tenor INT NOT NULL,
+            jumlah_cicilan INT NOT NULL,
+            tanggal_cicilan DATE NOT NULL,
+            id_staff INT NOT NULL,
+            FOREIGN KEY (id_kontrak) REFERENCES kontrak(id_kontrak),
+            FOREIGN KEY (id_staff) REFERENCES users(id_user)
           );
-
-          -- Table contracts (jika ada yang pakai nama ini)
-          CREATE TABLE IF NOT EXISTS contracts (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            user_id INT,
-            title VARCHAR(255),
-            content TEXT,
-            amount DECIMAL(15,2),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id)
-          );
-
+          
           EOF
           
-          echo " Verifying tables created successfully:"
+          echo "Tables created. Verifying..."
           mysql -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" -e "USE adauang_db; SHOW TABLES;"
           
           echo " Showing table structures:"
