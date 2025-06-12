@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import models.*;
+import models.User;
 
 public class SidebarView extends JPanel {
 
@@ -38,7 +38,7 @@ public class SidebarView extends JPanel {
         logoPanel.setOpaque(false);
         logoPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
         
-        ImageIcon logoIcon = createIcon("/icon.png", 35, 28);
+        ImageIcon logoIcon = createIcon("/assets/icon.png", 35, 28);
         JLabel logoIconLabel = new JLabel(logoIcon);
 
         JLabel appTitle = new JLabel("AdaUang");
@@ -54,16 +54,16 @@ public class SidebarView extends JPanel {
         if (currentUser != null) {
             switch (currentUser.getRole()) {
                 case User.ROLE_ADMIN:
-                    topPanel.add(menuButton(createIcon("/user_icon.png", 24, 24), "Manajemen User", "user_management"));
+                    topPanel.add(menuButton(createIcon("/assets/user_icon.png", 24, 24), "Manajemen User", "user_management"));
                     break;
                 case User.ROLE_STAFF:
-                    topPanel.add(menuButton(createIcon("/contract_icon.png", 24, 24), "Manajemen Kontrak", "kontrak"));
-                    topPanel.add(menuButton(createIcon("/contract_icon.png", 24, 24), "Manajemen Cicilan", "cicilan"));
+                    topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Manajemen Kontrak", "kontrak"));
+                    topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Manajemen Cicilan", "cicilan"));
                     break;
                 case User.ROLE_MANAGER:
-                    topPanel.add(menuButton(createIcon("/contract_icon.png", 24, 24), "Manajemen Kontrak", "kontrak"));
-                    topPanel.add(menuButton(createIcon("/contract_icon.png", 24, 24), "Manajemen Cicilan", "cicilan"));
-                    topPanel.add(menuButton(createIcon("/contract_icon.png", 24, 24), "Laporan Umur Piutang", "aging-report"));
+                    topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Manajemen Kontrak", "kontrak"));
+                    topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Manajemen Cicilan", "cicilan"));
+                    topPanel.add(menuButton(createIcon("/assets/contract_icon.png", 24, 24), "Laporan Umur Piutang", "aging-report"));
                     break;
             }
         }
@@ -82,7 +82,7 @@ public class SidebarView extends JPanel {
         userInfoRow.setOpaque(false);
         userInfoRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
 
-        ImageIcon avatarIcon = createIcon("/avatar_icon.png", 22, 22);
+        ImageIcon avatarIcon = createIcon("/assets/avatar_icon.png", 22, 22);
         JLabel avatarLabel = new JLabel(avatarIcon);
 
         JPanel userDetailsPanel = new JPanel();
@@ -112,7 +112,7 @@ public class SidebarView extends JPanel {
         logoutRow.setCursor(new Cursor(Cursor.HAND_CURSOR));
         logoutRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
-        ImageIcon logoutIcon = createIcon("/logout_icon.png", 24, 24);
+        ImageIcon logoutIcon = createIcon("/assets/logout_icon.png", 24, 24);
         JLabel logoutIconLabel = new JLabel(logoutIcon);
         
         JLabel logoutText = new JLabel("Logout");

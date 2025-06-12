@@ -48,11 +48,7 @@ public class DatabaseMigration {
         // Connect without specifying database first
         String baseUrl = String.format("jdbc:mysql://%s:%s/", 
             "127.0.0.1", "3306");
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+            
         try (Connection conn = java.sql.DriverManager.getConnection(
                 baseUrl, config.getDbUsername(), config.getDbPassword());
              Statement stmt = conn.createStatement()) {

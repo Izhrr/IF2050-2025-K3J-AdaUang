@@ -4,6 +4,8 @@ import controllers.AuthController;
 import controllers.ContractController;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
+import java.awt.image.BufferedImage;
+import java.net.URL;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -41,7 +43,7 @@ public class ContractView extends JPanel {
     public ContractView(AuthController authController) {
         this.authController = authController;
         this.contractController = new ContractController();
-        this.optionIcon =createIcon("/option_icon.png", 16, 16);
+        this.optionIcon = createIcon("/assets/option_icon.png", 18, 18);
 
         setLayout(new BorderLayout());
         setOpaque(true);
@@ -279,7 +281,8 @@ public class ContractView extends JPanel {
         panel.setBackground(Color.WHITE);
         panel.setBorder(new MatteBorder(0, 1, 0, 0, new Color(220, 220, 220)));
         panel.setVisible(false);
-        ImageIcon closeIcon = createIcon("/close_icon.png", 16, 16);
+
+        ImageIcon closeIcon = createIcon("/assets/close_icon.png", 16, 16);
         JButton closeButton = new JButton(closeIcon);
         closeButton.setBounds(305, 15, 30, 30);
         closeButton.setBorderPainted(false);
@@ -405,7 +408,7 @@ public class ContractView extends JPanel {
         panel.setBorder(new MatteBorder(0, 1, 0, 0, new Color(220, 220, 220)));
         panel.setVisible(false);
 
-        ImageIcon closeIcon = createIcon("/close_icon.png", 16, 16);
+        ImageIcon closeIcon = createIcon("/assets/close_icon.png", 16, 16);
         JButton closeButton = new JButton(closeIcon);
         closeButton.setBounds(305, 15, 30, 30);
         closeButton.setBorderPainted(false);
@@ -473,14 +476,20 @@ public class ContractView extends JPanel {
         return valueLabel;
     }
 
-    public ImageIcon createIcon(String resourcePath, int width, int height) {
-        java.net.URL imgUrl = getClass().getResource(resourcePath);
-        if (imgUrl == null) {
-            System.err.println("Resource not found: " + resourcePath);
-            return null;
+    private ImageIcon createIcon(String path, int width, int height) {
+        URL resource = getClass().getResource(path);
+        if (resource == null) {
+            System.err.println("Error: Icon resource not found at path: " + path);
+            return new ImageIcon(new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB));
         }
-        ImageIcon icon = new ImageIcon(imgUrl);
-        Image scaled = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaled);
+        return new ImageIcon(new ImageIcon(resource).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (visible) {
+            loadTableData(); // Auto refresh saat panel ditampilkan
+        }
     }
 }

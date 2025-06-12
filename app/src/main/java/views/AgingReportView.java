@@ -3,7 +3,6 @@ package views;
 import controllers.AgingReportController;
 import controllers.AuthController;
 import models.AgingReport;
-import models.User;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -19,7 +18,9 @@ public class AgingReportView extends JPanel {
     private final AgingReportController agingReportController;
     private final AuthController authController;
     private JTable agingTable;
+    private JTable summaryTable; // Tambahkan tabel summary
     private DefaultTableModel tableModel;
+    private DefaultTableModel summaryTableModel; // Tambahkan model untuk summary
     private JComboBox<String> monthComboBox;
     private JComboBox<Integer> yearComboBox;
 
@@ -58,8 +59,9 @@ public class AgingReportView extends JPanel {
 
         panel.add(headerPanel, BorderLayout.NORTH);
 
-        JPanel tableContainer = createTableContainer();
-        panel.add(tableContainer, BorderLayout.CENTER);
+        // Create tables container dengan kedua tabel
+        JPanel tablesContainer = createTablesContainer();
+        panel.add(tablesContainer, BorderLayout.CENTER);
 
         return panel;
     }
@@ -96,101 +98,110 @@ public class AgingReportView extends JPanel {
         filterPanel.add(refreshButton);
 
         return filterPanel;
+... (232 lines left)
+Collapse
+message.txt
+15 KB
+instalmentview
+package views;
+
+import controllers.AuthController;
+import controllers.ContractController;
+import controllers.InstalmentController;
+import models.Instalment;
+Expand
+message.txt
+16 KB
+package controllers;
+
+import models.AgingReport;
+import services.AgingReportService;
+import java.util.List;
+
+public class AgingReportController extends BaseController {
+
+    private final AgingReportService agingReportService;
+
+    public AgingReportController() {
+        this.agingReportService = new AgingReportService();
+    }
+    
+    public List<AgingReport> getAgingReport() {
+        return agingReportService.getAgingReportByBranch();
     }
 
-    private JPanel createTableContainer() {
-        JPanel tableContainer = new JPanel(new BorderLayout());
-        tableContainer.setBackground(Color.WHITE);
-        
-        String[] columns = {"Cabang", "Total Nasabah", "1-30 Hari", "31-60 Hari", "61-90 Hari", ">90 Hari", "Total Outstanding"};
-        tableModel = new DefaultTableModel(columns, 0) {
-            @Override public boolean isCellEditable(int row, int col) { return false; }
-        };
-        agingTable = new JTable(tableModel);
-        setupTableStyle();
-        
-        JScrollPane scrollPane = new JScrollPane(agingTable);
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
-        scrollPane.getViewport().setBackground(Color.WHITE);
-        
-        tableContainer.add(agingTable.getTableHeader(), BorderLayout.NORTH);
-        tableContainer.add(scrollPane, BorderLayout.CENTER);
-        
-        return tableContainer;
+    public List<AgingReport> getAgingReportByMonthYear(int month, int year) {
+        return agingReportService.getAgingReportByBranchAndDate(month, year);
+    }
+    
+    // Tambahkan method baru untuk summary
+    public AgingReport getAgingReportSummary() {
+        return agingReportService.getAgingReportSummary();
+    }
+    
+    public AgingReport getAgingReportSummaryByMonthYear(int month, int year) {
+        return agingReportService.getAgingReportSummaryByDate(month, year);
+    }
+}
+package controllers;
+
+import models.Instalment;
+import services.InstalmentService;
+import java.time.LocalDate;
+import java.util.List;
+
+public class InstalmentController extends BaseController {
+    
+    private final InstalmentService instalmentService;
+
+    public InstalmentController() {
+        this.instalmentService = new InstalmentService();
     }
 
-    private void setupTableStyle() {
-        Color borderColor = new Color(220, 220, 220);
-        agingTable.setRowHeight(45);
-        agingTable.setFont(new Font("Montserrat", Font.PLAIN, 14));
-        agingTable.setSelectionBackground(new Color(235, 240, 255));
-        agingTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        agingTable.setShowGrid(true);
-        agingTable.setGridColor(borderColor);
-        agingTable.setIntercellSpacing(new Dimension(0, 0));
 
-        JTableHeader header = agingTable.getTableHeader();
-        header.setPreferredSize(new Dimension(100, 50));
-        header.setFont(new Font("Montserrat", Font.BOLD, 14));
-        header.setBackground(new Color(245, 247, 250));
-        header.setForeground(new Color(100, 100, 100));
-        header.setBorder(BorderFactory.createLineBorder(borderColor));
-
-        // Right-align currency columns
-        DefaultTableCellRenderer currencyRenderer = new DefaultTableCellRenderer();
-        currencyRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
-        
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-
-        agingTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Cabang
-        agingTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer); // Total Nasabah
-        
-        for(int i = 2; i < agingTable.getColumnCount(); i++){
-            agingTable.getColumnModel().getColumn(i).setCellRenderer(currencyRenderer);
-        }
-    }
-
-    private void loadTableData() {
+    public boolean addInstalment(int idKontrak, int jumlah, int tenor, LocalDate tanggal, int idStaff) {
         try {
-            // Debug data terlebih dahulu
-            AgingReport.debugAgingData();
-            
-            tableModel.setRowCount(0);
-            
-            // Get selected month and year
-            int selectedMonth = monthComboBox.getSelectedIndex() + 1;
-            int selectedYear = (Integer) yearComboBox.getSelectedItem();
-            
-            List<AgingReport> reports = agingReportController.getAgingReportByMonthYear(selectedMonth, selectedYear);
-            
-            System.out.println("Found " + reports.size() + " aging reports for " + selectedMonth + "/" + selectedYear);
-            
-            for (AgingReport report : reports) {
-                long totalOutstanding = report.getAging1to30() + report.getAging31to60() + 
-                                      report.getAging61to90() + report.getAgingOver90();
-                
-                tableModel.addRow(new Object[]{
-                    report.getBranch(),
-                    report.getTotalNasabah(),
-                    formatCurrency(report.getAging1to30()),
-                    formatCurrency(report.getAging31to60()),
-                    formatCurrency(report.getAging61to90()),
-                    formatCurrency(report.getAgingOver90()),
-                    formatCurrency(totalOutstanding)
-                });
-            }
+            return instalmentService.createInstalment(idKontrak, jumlah, tenor, tanggal, idStaff);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Controller error adding instalment: " + e.getMessage());
+            return false;
         }
     }
 
-    private String formatCurrency(long amount) {
-        return NumberFormat.getCurrencyInstance(new Locale("id", "ID")).format(amount);
+
+    public List<Instalment> getAllInstalments() {
+        return instalmentService.getAllInstalments();
     }
 
-    public void refreshData() {
-        System.out.println("\n🔄 Refreshing aging report data...");
-        loadTableData();
+
+    public List<Instalment> getInstalmentsByContract(int idKontrak) {
+        return instalmentService.getInstalmentsByContract(idKontrak);
     }
+
+
+    public Instalment getInstalmentById(int id) {
+        return instalmentService.getInstalmentById(id);
+    }
+
+
+    public int getNextTenor(int idKontrak) {
+        return instalmentService.getNextTenor(idKontrak);
+    }
+
+
+    public LocalDate getLastPaymentDate(int idKontrak) {
+        return instalmentService.getLastPaymentDate(idKontrak);
+    }
+
+
+    public boolean validatePayment(int idKontrak, int tenor, LocalDate tanggal) {
+        return instalmentService.canPayInstalment(idKontrak, tenor, tanggal);
+    }
+
+
+    public LocalDate getMinimumPaymentDate(int idKontrak) {
+        LocalDate lastDate = instalmentService.getLastPaymentDate(idKontrak);
+        return lastDate != null ? lastDate.plusMonths(1) : LocalDate.now();
+    }
+
 }
