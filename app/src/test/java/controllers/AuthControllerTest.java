@@ -17,7 +17,7 @@ public class AuthControllerTest {
     @Test
     void testLoginSuccess() {
         AuthController authController = new AuthController();
-        boolean loginResult = authController.login("adminsalah", "admin123");
+        boolean loginResult = authController.login("admin", "admin123");
         assertTrue(loginResult, "Login admin seharusnya berhasil");
 
         User currentUser = authController.getCurrentUser();
