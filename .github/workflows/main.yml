@@ -2,9 +2,9 @@ name: Java CI/CD with Gradle
 
 on:
   push:
-    branches: [ main, restructure ]
+    branches: [ main, development2, restructure ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, development2, restructure ]
 
 jobs:
   test:
@@ -39,21 +39,22 @@ jobs:
       
       - name: Wait for MySQL to be ready
         run: |
-          echo "Waiting for MySQL to start..."
+          echo " Waiting for MySQL to start..."
           for i in {1..30}; do
             if mysqladmin ping -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" --silent; then
-              echo "✅ MySQL is ready!"
+              echo " MySQL is ready!"
               break
             fi
-            echo "⏳ Attempt $i: MySQL not ready yet, waiting 5 seconds..."
+            echo "Attempt $i: MySQL not ready yet, waiting 5 seconds..."
             sleep 5
           done
       
-      # ← INI YANG KURANG! Setup database schema
       - name: Setup Database Schema
         run: |
-          echo "🗄️ Setting up database schema..."
+          echo " Creating database tables..."
           mysql -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" adauang_db << 'EOF'
+          
+          -- Table users
           CREATE TABLE IF NOT EXISTS users (
             id INT PRIMARY KEY AUTO_INCREMENT,
             username VARCHAR(255) NOT NULL,
@@ -62,27 +63,54 @@ jobs:
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
 
-          CREATE TABLE IF NOT EXISTS cicilan (
+          -- Table kontrak
+          CREATE TABLE IF NOT EXISTS kontrak (
             id INT PRIMARY KEY AUTO_INCREMENT,
             user_id INT,
-            amount DECIMAL(10,2),
-            description TEXT,
+            branch VARCHAR(255),
+            title VARCHAR(255),
+            content TEXT,
+            amount DECIMAL(15,2),
+            status VARCHAR(50),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
           );
 
+          -- Table cicilan  
+          CREATE TABLE IF NOT EXISTS cicilan (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            kontrak_id INT,
+            user_id INT,
+            amount DECIMAL(15,2),
+            paid_amount DECIMAL(15,2) DEFAULT 0,
+            due_date DATE,
+            payment_date DATE NULL,
+            status VARCHAR(50) DEFAULT 'pending',
+            description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (kontrak_id) REFERENCES kontrak(id),
+            FOREIGN KEY (user_id) REFERENCES users(id)
+          );
+
+          -- Table contracts (jika ada yang pakai nama ini)
           CREATE TABLE IF NOT EXISTS contracts (
             id INT PRIMARY KEY AUTO_INCREMENT,
             user_id INT,
             title VARCHAR(255),
             content TEXT,
+            amount DECIMAL(15,2),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
           );
+
           EOF
           
-          echo "📋 Verifying tables created:"
+          echo " Verifying tables created successfully:"
           mysql -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" -e "USE adauang_db; SHOW TABLES;"
+          
+          echo " Showing table structures:"
+          mysql -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" -e "USE adauang_db; DESCRIBE users; DESCRIBE kontrak; DESCRIBE cicilan;"
       
       - name: Make gradlew executable
         run: chmod +x ./gradlew
