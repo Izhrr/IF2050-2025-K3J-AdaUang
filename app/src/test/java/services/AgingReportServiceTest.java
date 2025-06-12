@@ -36,4 +36,29 @@ public class AgingReportServiceTest {
             assertNotNull(report.getBranch(), "Branch tidak boleh null di report");
         }
     }
+
+    @Test
+    void testGetAgingReportSummary() {
+        AgingReport summary = service.getAgingReportSummary();
+        assertNotNull(summary, "Summary aging report tidak boleh null");
+        assertEquals("TOTAL SEMUA CABANG", summary.getBranch());
+        assertTrue(summary.getTotalNasabah() >= 0);
+        assertTrue(summary.getAging1to30() >= 0);
+        assertTrue(summary.getAging31to60() >= 0);
+        assertTrue(summary.getAging61to90() >= 0);
+        assertTrue(summary.getAgingOver90() >= 0);
+    }
+
+    @Test
+    void testGetAgingReportSummaryByDate() {
+        java.time.LocalDate now = java.time.LocalDate.now();
+        AgingReport summary = service.getAgingReportSummaryByDate(now.getMonthValue(), now.getYear());
+        assertNotNull(summary, "Summary aging report by month/year tidak boleh null");
+        assertEquals("TOTAL SEMUA CABANG", summary.getBranch());
+        assertTrue(summary.getTotalNasabah() >= 0);
+        assertTrue(summary.getAging1to30() >= 0);
+        assertTrue(summary.getAging31to60() >= 0);
+        assertTrue(summary.getAging61to90() >= 0);
+        assertTrue(summary.getAgingOver90() >= 0);
+    }
 }

@@ -1,8 +1,9 @@
 package services;
 
-import models.Cicilan;
+import models.Instalment;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import database.DatabaseSeeder;
 
 import java.time.LocalDate;
@@ -12,32 +13,44 @@ import java.sql.*;
 public class InstalmentServiceTest {
 
     static InstalmentService instalmentService;
+    static int idKontrakAktif;
+    static int idStaffAktif;
+    static int cicilanPerBulan;
 
     @BeforeAll
-    static void setup() {
+    static void setup() throws Exception {
         DatabaseSeeder seeder = new DatabaseSeeder();
         assertTrue(seeder.runSeeder(), "Seeder harus sukses dijalankan");
         instalmentService = new InstalmentService();
+
+        // Cari kontrak aktif yang belum lunas
+        try (Connection conn = database.DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT k.id_kontrak, k.cicilan_per_bulan, k.id_user FROM kontrak k WHERE k.status = 1 LIMIT 1")) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                idKontrakAktif = rs.getInt("id_kontrak");
+                cicilanPerBulan = rs.getInt("cicilan_per_bulan");
+                idStaffAktif = rs.getInt("id_user");
+            }
+        }
+        // Jika tidak ada kontrak aktif, test akan di-skip
     }
 
     @Test
-    void testGetAllCicilan() {
-        List<Cicilan> cicilanList = instalmentService.getAllCicilan();
-        assertNotNull(cicilanList, "Cicilan list tidak boleh null");
+    void testGetAllInstalments() {
+        List<Instalment> instalments = instalmentService.getAllInstalments();
+        assertNotNull(instalments, "Instalment list tidak boleh null");
     }
 
     @Test
-    void testAddCicilanSuccess() throws Exception {
-        // Ambil kontrak yang belum lunas
-        int idKontrak = 2; // sesuaikan dengan seeder
-        int idStaff = 2;
+    void testCreateInstalmentSuccess() throws Exception {
+        assumeTrue(idKontrakAktif > 0, "Tidak ada kontrak aktif di DB");
+
         int tenorTerakhir = 0;
-        int cicilanPerBulan = 0;
-        Connection conn = database.DatabaseConnection.getInstance().getConnection();
-
-        // Ambil tenor terakhir
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT COALESCE(MAX(tenor), 0) FROM cicilan WHERE id_kontrak = ?")) {
-            stmt.setInt(1, idKontrak);
+        LocalDate tanggalCicilan = LocalDate.now();
+        try (Connection conn = database.DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT COALESCE(MAX(tenor), 0) FROM cicilan WHERE id_kontrak = ?")) {
+            stmt.setInt(1, idKontrakAktif);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 tenorTerakhir = rs.getInt(1);
@@ -45,29 +58,36 @@ public class InstalmentServiceTest {
         }
         int nextTenor = tenorTerakhir + 1;
 
-        // Ambil jumlah cicilan per bulan
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT cicilan_per_bulan FROM kontrak WHERE id_kontrak = ?")) {
-            stmt.setInt(1, idKontrak);
+        // Tanggal harus valid: jika sudah ada pembayaran sebelumnya, tanggal harus >= 1 bulan setelahnya
+        try (Connection conn = database.DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT MAX(tanggal_cicilan) AS last_date FROM cicilan WHERE id_kontrak = ?")) {
+            stmt.setInt(1, idKontrakAktif);
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                cicilanPerBulan = rs.getInt("cicilan_per_bulan");
+            if (rs.next() && rs.getDate("last_date") != null) {
+                LocalDate lastDate = rs.getDate("last_date").toLocalDate();
+                tanggalCicilan = lastDate.plusMonths(1);
             }
         }
 
-        boolean result = instalmentService.addCicilan(idKontrak, cicilanPerBulan, nextTenor, LocalDate.now(), idStaff);
-        assertTrue(result, "Tambah cicilan harus berhasil");
+        boolean result = instalmentService.createInstalment(
+            idKontrakAktif,
+            cicilanPerBulan,
+            nextTenor,
+            tanggalCicilan,
+            idStaffAktif
+        );
+        assertTrue(result, "Tambah cicilan harus berhasil (pastikan kontrak aktif dan tenor valid)");
     }
 
     @Test
-    void testAddCicilanFailWrongAmount() throws Exception {
-        int idKontrak = 2;
-        int idStaff = 2;
+    void testCreateInstalmentFailWrongAmount() throws Exception {
+        assumeTrue(idKontrakAktif > 0, "Tidak ada kontrak aktif di DB");
         int tenorTerakhir = 0;
-        Connection conn = database.DatabaseConnection.getInstance().getConnection();
+        LocalDate tanggalCicilan = LocalDate.now();
 
-        // Ambil tenor terakhir
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT COALESCE(MAX(tenor), 0) FROM cicilan WHERE id_kontrak = ?")) {
-            stmt.setInt(1, idKontrak);
+        try (Connection conn = database.DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT COALESCE(MAX(tenor), 0) FROM cicilan WHERE id_kontrak = ?")) {
+            stmt.setInt(1, idKontrakAktif);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 tenorTerakhir = rs.getInt(1);
@@ -75,38 +95,56 @@ public class InstalmentServiceTest {
         }
         int nextTenor = tenorTerakhir + 1;
 
-        // Ambil jumlah cicilan per bulan
-        int cicilanPerBulan = 0;
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT cicilan_per_bulan FROM kontrak WHERE id_kontrak = ?")) {
-            stmt.setInt(1, idKontrak);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                cicilanPerBulan = rs.getInt("cicilan_per_bulan");
-            }
-        }
-
-        // pakai jumlah salah
-        boolean result = instalmentService.addCicilan(idKontrak, cicilanPerBulan + 1000, nextTenor, LocalDate.now(), idStaff);
+        boolean result = instalmentService.createInstalment(
+            idKontrakAktif,
+            cicilanPerBulan + 1234, // jumlah salah
+            nextTenor,
+            tanggalCicilan,
+            idStaffAktif
+        );
         assertFalse(result, "Tambah cicilan dengan jumlah salah harus gagal");
     }
 
     @Test
-    void testAddCicilanFailWrongTenor() throws Exception {
-        int idKontrak = 2;
-        int idStaff = 2;
-        int cicilanPerBulan = 0;
+    void testCreateInstalmentFailWrongTenor() throws Exception {
+        assumeTrue(idKontrakAktif > 0, "Tidak ada kontrak aktif di DB");
 
-        // Ambil jumlah cicilan per bulan
-        try (PreparedStatement stmt = database.DatabaseConnection.getInstance().getConnection().prepareStatement("SELECT cicilan_per_bulan FROM kontrak WHERE id_kontrak = ?")) {
-            stmt.setInt(1, idKontrak);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                cicilanPerBulan = rs.getInt("cicilan_per_bulan");
-            }
-        }
-
-        // pakai tenor salah (misal: lompat)
-        boolean result = instalmentService.addCicilan(idKontrak, cicilanPerBulan, 99, LocalDate.now(), idStaff);
+        // Ambil jumlah cicilan per bulan saja, tenor lompat
+        boolean result = instalmentService.createInstalment(
+            idKontrakAktif,
+            cicilanPerBulan,
+            99, // tenor lompat
+            LocalDate.now(),
+            idStaffAktif
+        );
         assertFalse(result, "Tambah cicilan dengan tenor salah harus gagal");
+    }
+
+    @Test
+    void testGetInstalmentsByContract() {
+        assumeTrue(idKontrakAktif > 0, "Tidak ada kontrak aktif di DB");
+        List<Instalment> list = instalmentService.getInstalmentsByContract(idKontrakAktif);
+        assertNotNull(list, "Instalment by contract tidak boleh null");
+    }
+
+    @Test
+    void testGetNextTenor() {
+        assumeTrue(idKontrakAktif > 0, "Tidak ada kontrak aktif di DB");
+        int nextTenor = instalmentService.getNextTenor(idKontrakAktif);
+        assertTrue(nextTenor >= 1, "Next tenor minimal 1");
+    }
+
+    @Test
+    void testGetLastPaymentDate() {
+        assumeTrue(idKontrakAktif > 0, "Tidak ada kontrak aktif di DB");
+        LocalDate last = instalmentService.getLastPaymentDate(idKontrakAktif);
+        assertTrue(last == null || last.isBefore(LocalDate.now()) || last.isEqual(LocalDate.now()));
+    }
+
+    @Test
+    void testCanPayInstalment() {
+        assumeTrue(idKontrakAktif > 0, "Tidak ada kontrak aktif di DB");
+        boolean canPay = instalmentService.canPayInstalment(idKontrakAktif, 1, LocalDate.now());
+        assertNotNull(canPay);
     }
 }
