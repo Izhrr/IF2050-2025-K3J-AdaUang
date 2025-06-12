@@ -2,9 +2,9 @@ name: Java CI/CD with Gradle
 
 on:
   push:
-    branches: [ develop, main, restructure ]
+    branches: [ main, restructure ]
   pull_request:
-    branches: [ develop, main, restructure ]
+    branches: [ main ]
 
 jobs:
   test:
@@ -48,10 +48,41 @@ jobs:
             echo "⏳ Attempt $i: MySQL not ready yet, waiting 5 seconds..."
             sleep 5
           done
+      
+      # ← INI YANG KURANG! Setup database schema
+      - name: Setup Database Schema
+        run: |
+          echo "🗄️ Setting up database schema..."
+          mysql -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" adauang_db << 'EOF'
+          CREATE TABLE IF NOT EXISTS users (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            username VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE TABLE IF NOT EXISTS cicilan (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            user_id INT,
+            amount DECIMAL(10,2),
+            description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+          );
+
+          CREATE TABLE IF NOT EXISTS contracts (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            user_id INT,
+            title VARCHAR(255),
+            content TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+          );
+          EOF
           
-          # Verify database exists
-          echo "📋 Available databases:"
-          mysql -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" -e "SHOW DATABASES;"
+          echo "📋 Verifying tables created:"
+          mysql -h 127.0.0.1 -P 3306 -u root -p"ci_test_password_2025" -e "USE adauang_db; SHOW TABLES;"
       
       - name: Make gradlew executable
         run: chmod +x ./gradlew
