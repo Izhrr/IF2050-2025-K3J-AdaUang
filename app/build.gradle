@@ -44,3 +44,30 @@ java {
 application {
     mainClass = 'AppLauncher'
 }
+
+tasks.named('test') {
+    testLogging {
+        events "passed", "failed", "skipped", "standard_out", "standard_error"
+        showStandardStreams = true
+    }
+}
+
+testing {
+    suites {
+        test {
+            useJUnitJupiter('5.12.1')
+            targets.all {
+                testTask.configure {
+                    testLogging {
+                        events "passed", "failed", "skipped", "standard_out", "standard_error"
+                        showStandardStreams = true
+                    }
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.yaml:snakeyaml:2.2'
+}
