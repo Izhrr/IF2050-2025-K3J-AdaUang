@@ -24,7 +24,7 @@ public class MainView extends JFrame {
         setSize(AppConstants.WINDOW_WIDTH, AppConstants.WINDOW_HEIGHT);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        setIconImage(new ImageIcon(getClass().getResource("/assets/icon.png")).getImage());
+        setIconImage(new ImageIcon(getClass().getResource("/icon.png")).getImage());
 
         SidebarView.SidebarListener sidebarListener = new SidebarView.SidebarListener() {
             @Override

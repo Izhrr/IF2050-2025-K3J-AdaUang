@@ -43,7 +43,7 @@ public class ContractView extends JPanel {
     public ContractView(AuthController authController) {
         this.authController = authController;
         this.contractController = new ContractController();
-        this.optionIcon = createIcon("/assets/option_icon.png", 18, 18);
+        this.optionIcon = createIcon("/option_icon.png", 18, 18);
 
         setLayout(new BorderLayout());
         setOpaque(true);
@@ -282,7 +282,7 @@ public class ContractView extends JPanel {
         panel.setBorder(new MatteBorder(0, 1, 0, 0, new Color(220, 220, 220)));
         panel.setVisible(false);
 
-        ImageIcon closeIcon = createIcon("/assets/close_icon.png", 16, 16);
+        ImageIcon closeIcon = createIcon("/close_icon.png", 16, 16);
         JButton closeButton = new JButton(closeIcon);
         closeButton.setBounds(305, 15, 30, 30);
         closeButton.setBorderPainted(false);
@@ -408,7 +408,7 @@ public class ContractView extends JPanel {
         panel.setBorder(new MatteBorder(0, 1, 0, 0, new Color(220, 220, 220)));
         panel.setVisible(false);
 
-        ImageIcon closeIcon = createIcon("/assets/close_icon.png", 16, 16);
+        ImageIcon closeIcon = createIcon("/close_icon.png", 16, 16);
         JButton closeButton = new JButton(closeIcon);
         closeButton.setBounds(305, 15, 30, 30);
         closeButton.setBorderPainted(false);
