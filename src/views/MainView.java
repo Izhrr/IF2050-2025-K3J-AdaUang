@@ -45,8 +45,8 @@ public class MainView extends JFrame {
         mainPanel = new JPanel(cardLayout);
 
         mainPanel.add(new ContractView(authController), "kontrak");
-        mainPanel.add(new InstalmentView(authController), "cicilan"); // ✅ Benar
-        mainPanel.add(new AgingReportView(authController), "aging-report"); // ✅ Benar
+        mainPanel.add(new InstalmentView(authController), "cicilan");
+        mainPanel.add(new AgingReportView(authController), "aging-report");
 
         if (currentUser != null && "admin".equals(currentUser.getRole())) {
             mainPanel.add(new UserManagementView(userController, authController), "user_management");
